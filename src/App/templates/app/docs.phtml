@@ -1,0 +1,18 @@
+<?php $parser = new \ParsedownExtra();?>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="jumbotron">
+            <?php echo $parser->text(file_get_contents(__DIR__ . "/require-info.md")); ?>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <?php echo $parser->text(file_get_contents(__DIR__ . "/passport.md")); ?>
+    </div>
+    <div class="col-sm-6">
+        <?php echo $parser->text(file_get_contents(__DIR__ . "/payment.md")); ?>
+    </div>
+
+    <div class="col-sm-12">
+        <?php echo $parser->text(file_get_contents(__DIR__ . "/errorCode.md")); ?>
+    </div>
+</div>

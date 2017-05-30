@@ -1,0 +1,54 @@
+<?= $this->doctype();?>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <?= $this->headTitle('API')->setSeparator(' - ')->setAutoEscape(false) ?>
+        <?= $this->headMeta()
+            ->appendName('viewport', 'width=device-width, initial-scale=1.0')
+            ->appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+        ?>
+        <!-- Le styles -->
+        <?= $this->headLink(['rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => ''])
+            ->prependStylesheet("https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
+            ->prependStylesheet("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css")
+            ->appendStylesheet("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css")
+            ->appendStylesheet('/css/github-markdown.css')
+        ?>
+        <!-- Scripts -->
+        <?php $this->headScript()
+        	->prependFile("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js")
+        	->prependFile("https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js", "text/javascript", array('conditional' => 'lt IE 9'))
+        	->prependFile("https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js")
+        	->appendFile("http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js")
+        ?>
+    </head>
+    <body>
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">API Documentation</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+        <div class="container">
+            <article class="markdown-body">
+            <?= $this->content ?>
+            </article>
+	    </div>
+        <?php echo $this->headScript();?>
+        <script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>

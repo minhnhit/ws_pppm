@@ -1,0 +1,12 @@
+<link href="<?php echo env('ID_SIRE_URL');?>/css/bootstrap.min.css" rel="stylesheet">
+<div class="container">
+    <div class="">Chào bạn <strong><?php echo $this->username;?></strong></div>
+<br/>
+<p>Bạn vừa đăng ký sử dụng email: <strong><?php echo $this->email;?></strong> tại <a href="https://id.568play.vn/tai-khoan/email/activate">ID.568PLAY.VN</a>, dưới đây là mã xác thực: </p>
+<p>Mã xác thực: <strong><?php echo $this->code;?></strong></p>
+</div>
+
+<div class="">
+    <p>Thanks,</p>
+    <p>568E ID Team.</p>
+</div>

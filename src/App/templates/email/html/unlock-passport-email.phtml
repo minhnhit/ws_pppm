@@ -1,0 +1,9 @@
+Chào bạn <?php echo $this->username;?>
+<br/>
+
+<p>Bạn vừa yêu cầu mở khóa tài khoản: <?php echo $this->username;?></p>
+<p>Mã xác thực của bạn là: <?php echo $this->code;?></p>
+<p>Truy cập địa chỉ dưới đây để hoàn tất việc kích hoạt tài khoản: </p>
+<a href="https://<?php echo $_SERVER['HTTP_HOST'];?>/thay-doi-thong-tin-bao-mat/unlock">
+    https://<?php echo $_SERVER['HTTP_HOST'];?>/thay-doi-thong-tin-bao-mat/unlock
+</a>
