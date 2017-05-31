@@ -34,10 +34,19 @@ class Util
         $padding = 1,
         $binary_output = false
     ) {
+        $pub = './data/ssh/'.strtolower($clientId).'/public_key.pub';
+        $priv = './data/ssh/'.strtolower($clientId).'/private_key.pem';
+        if(!file_exists($pub)) {
+            $pub = './data/ssh/public_key.pub';
+        }
+        if(!file_exists($priv)) {
+            $priv = './data/ssh/private_key.pem';
+        }
+        var_dump($pub);die;
         try {
             $rsa = Rsa::factory([
-                'public_key'    => './data/ssh/'.strtolower($clientId).'/public_key.pub',
-                'private_key'   => './data/ssh/'.strtolower($clientId).'/private_key.pem',
+                'public_key'    => $pub,
+                'private_key'   => $priv,
                 'pass_phrase'   => $pass_phrase,
                 'binary_output' => $binary_output,
                 'opensslPadding' => $padding
