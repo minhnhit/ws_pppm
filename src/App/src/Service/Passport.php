@@ -62,18 +62,31 @@ class Passport extends AbstractService
 
     public function resetPass($params)
     {
+        $errCode = $this->validateParams($params, ['username', 'password', 'code']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
         $result = $this->mapper->resetPassword($params);
         return $result;
     }
 
     public function changePass($params)
     {
+        $params['password'] = $params['newPassword'];
+        $errCode = $this->validateParams($params, ['username', 'password', 'oldPassword']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
         $result = $this->mapper->updatePassword($params);
         return $result;
     }
 
     public function updateEmail($params)
     {
+        $errCode = $this->validateParams($params, ['username', 'email']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
         $result = $this->mapper->updateEmail($params);
         return $result;
     }
@@ -94,5 +107,10 @@ class Passport extends AbstractService
     {
         $result = $this->mapper->addGold($uid, $amount);
         return $result;
+    }
+
+    public function getBalance($username)
+    {
+
     }
 }

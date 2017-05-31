@@ -54,6 +54,14 @@ class RegisterAction extends AbstractAction
      *         type="string",
      *         default=""
      *     ),
+     *     @SWG\Parameter(
+     *         name="email",
+     *         in="formData",
+     *         description="Email",
+     *         required=false,
+     *         type="string",
+     *         default=""
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="user info response",

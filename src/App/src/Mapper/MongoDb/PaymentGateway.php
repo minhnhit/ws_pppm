@@ -96,10 +96,13 @@ class PaymentGateway extends AbstractGateway
      */
     public function updateTransaction($data)
     {
-    	$collectionName = Card::COLLECTION_NAME;
-    	if(isset($data['cashout'])) {
-    		$collectionName = Card::CASHOUT_COLLECTION_NAME;
-    	}
+        $btype = isset($data['ctype']) ? $data['ctype'] : 'silver';
+        if (strtolower($btype) === 'silver') {
+            $collectionName = Card::COLLECTION_NAME;
+        }else {
+            $collectionName = Card::CASHOUT_COLLECTION_NAME;
+        }
+
         $msec = floor(microtime(true) * 1000);
     	try {
     		$col = $this->getDb()->selectCollection($collectionName);
@@ -110,8 +113,8 @@ class PaymentGateway extends AbstractGateway
     			],
     			[
    					'$set' => [
-						'amount' => $data['amount'],
-    					'gold' => $data['gold'],
+						'amount' => (int)$data['amount'],
+    					'gold' => (int)$data['gold'],
    						'provider' => $data['provider'],
     					'status' => 1,
     					'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
@@ -125,13 +128,14 @@ class PaymentGateway extends AbstractGateway
     		if($trans) {
     		    // + balance
                 $this->getServiceManager()->get('PassportService')
-                    ->addGold($data['user']['id'], ['gold' => $data['gold']]);
+                    ->addGold($data['user']['id'], ['gold' => (int)$data['gold'], 'point' => (int)$data['point']]);
     			return ['code' => 1, 'result' => (array)$trans];
 	    	}
     	}catch(\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
     		$this->getMailService()->sendAlertEmail($subject, $e);
     	}
+    	return ['code' => -1];
     }
 
     /**
@@ -140,29 +144,32 @@ class PaymentGateway extends AbstractGateway
      */
     public function cancelTransaction($data)
     {
-    	$collectionName = Card::COLLECTION_NAME;
-    	if(isset($data['cashout'])) {
-    		$collectionName = Card::CASHOUT_COLLECTION_NAME;
-    	}
+        $btype = isset($data['ctype']) ? $data['ctype'] : 'silver';
+        if (strtolower($btype) === 'silver') {
+            $collectionName = Card::COLLECTION_NAME;
+        }else {
+            $collectionName = Card::CASHOUT_COLLECTION_NAME;
+        }
+
         $msec = floor(microtime(true) * 1000);
     	try {
     		$col = $this->getDb()->selectCollection($collectionName);
     		$trans = $col->findOneAndUpdate(
-    				[
-    					'_id' => new \MongoDB\BSON\ObjectID($data['transactionId']),
-    					'status' => 0
-    				],
-    				[
-    					'$set' => [
-    						'provider' => $data['provider'],
-    						'status' => -1,
-    						'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
-    					]
-    				],
-    				[
-    					'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
-    				]
-    				);
+                [
+                    '_id' => new \MongoDB\BSON\ObjectID($data['transactionId']),
+                    'status' => 0
+                ],
+                [
+                    '$set' => [
+                        'provider' => $data['provider'],
+                        'status' => -1,
+                        'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
+                    ]
+                ],
+                [
+                    'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                ]
+            );
     		
     		if($trans) {
     			return ['code' => 1, 'result' => (array)$trans];
@@ -276,7 +283,7 @@ class PaymentGateway extends AbstractGateway
     		if($res) {
     			// + balance here
                 $this->getServiceManager()->get('PassportService')
-                     ->addGold($data['user']['id'], ['gold' => $data['gold']]);
+                     ->addGold($data['user']['id'], ['gold' => (int)$data['gold']]);
                 return ['code' => 1, 'msg' => 'Ban da nap thanh cong ' . $data['amount'],
                         'transaction_id' => $res->getInsertedId()
                     ];
@@ -299,9 +306,11 @@ class PaymentGateway extends AbstractGateway
     	$match->setMatchId($data['matchId']);
     	$match->setWinner($data['winner']);
     	$match->setLoser($data['loser']);
-    	$match->setGold($fee);
-    	$match->setFee($data['fee']);
+    	$match->setGold((int)$data['gold']);
+    	$match->setFee((int)$fee);
     	$match->setStatus(1);
+
+        $data['status'] = isset($data['status'])? : 1;
     	
     	try {
 	    	$col = $this->getDb()->selectCollection(Match::COLLECTION_NAME);
@@ -312,26 +321,27 @@ class PaymentGateway extends AbstractGateway
 	    	    $gold = $fee / 2;
                 // check winner enough gold
                 $r1 = $this->getServiceManager()->get('PassportService')
-                    ->findOne([
+                    ->getMapper()->getBalance([
                         'username' => $data['winner']['username'],
-                        'balance.gold' => ['$gte' => $gold]
+                        'balance.gold' => ['$gte' => (int)$gold]
                     ]);
-                if(!$r1) {
+                if($r1['code'] != 1) {
                     return ['code' => -4015];
                 }
             }
             // check loser enough gold
             $r2 = $this->getServiceManager()->get('PassportService')
-                        ->findOne([
+                        ->getMapper()->getBalance([
                             'username' => $data['loser']['username'],
-                            'balance.gold' => ['$gte' => $gold]
+                            'balance.gold' => ['$gte' => (int)$gold]
                         ]);
-            if(!$r2) {
+
+            if($r2['code'] != 1) {
                 return ['code' => -4015];
             }
-	    	$ret = $col->findOne(['match_id' => $data['match_id']]);
+	    	$ret = $col->findOne(['match_id' => $data['matchId']]);
 	    	if($ret) {
-	    	    return ['code' => -9];
+	    	    return ['code' => -4018];
             }
 
 	    	$res = $col->insertOne($match);
@@ -340,17 +350,17 @@ class PaymentGateway extends AbstractGateway
                     // + gold (gold - fee)
                     $incGold = $gold - $fee;
                     $winnerBalance = $this->getServiceManager()->get('PassportService')
-                        ->addGold($data['winner']['id'], ['gold' => $incGold]);
+                        ->addGold($data['winner']['id'], ['gold' => (int)$incGold]);
                 }else {
                     // - gold
                     $winnerBalance = $this->getServiceManager()->get('PassportService')
-                        ->addGold($data['winner']['id'], ['gold' => -$gold]);
+                        ->addGold($data['winner']['id'], ['gold' => (int)-$gold]);
                 }
                 // - gold
                 $loserBalance = $this->getServiceManager()->get('PassportService')
-                    ->addGold($data['loser']['id'], ['gold' => -$gold]);
+                    ->addGold($data['loser']['id'], ['gold' => (int)-$gold]);
 
-	    	    return ['code' => 1, 'winner_username' => $data['winer']['username'],
+	    	    return ['code' => 1, 'winner_username' => $data['winner']['username'],
                         'loser_username' => $data['loser']['username'],
                         'winner_balance' => $winnerBalance,
                         'loser_balance' => $loserBalance
@@ -367,7 +377,8 @@ class PaymentGateway extends AbstractGateway
     {
         $userInfo = $this->getServiceManager()->get('PassportService')
                     ->getProfileByUsername($data['username']);
-        if($userInfo) {
+
+        if(!$userInfo) {
             return ['code' => -3002];
         }
         $data['user'] = $userInfo->getUserBasicInfo();
@@ -377,13 +388,8 @@ class PaymentGateway extends AbstractGateway
     	$promotion->setPromotionId($data['promotionId']);
     	$promotion->setCode($data['promotionCode']);
     	$promotion->setGold($data['gold']);
+
     	try {
-    	    // check user
-            $r1 = $this->getServiceManager()->get('PassportService')
-                        ->findByUsername($data['user']['username']);
-            if(!$r1) {// user not found
-                return ['code' => -3002];
-            }
             // check duplicate promotion_id
 	    	$col = $this->getDb()->selectCollection(Promotion::COLLECTION_NAME);
 	    	$r2 = $col->findOne(['promotion_id' => $data['promotionId']]);
@@ -395,9 +401,9 @@ class PaymentGateway extends AbstractGateway
             if ($res->getInsertedId()) {
                 // increment gold
                 $userBlanace = $this->getServiceManager()->get('PassportService')
-                    ->addGold($data['user']['id'], ['gold' => $data['gold']]);
+                    ->addGold($data['user']['id'], ['gold' => (int)$data['gold']]);
             }
-	    	return ['code' => 1, 'balance' => $userBlanace];
+	    	return ['code' => 1, 'result' => ['balance' => $userBlanace]];
     	}catch(\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
     		$this->getMailService()->sendAlertEmail($subject, $e);
@@ -411,34 +417,37 @@ class PaymentGateway extends AbstractGateway
      */
     public function buyCard($data)
     {
-        $errCode = $this->validateParams($data, ['username', 'cardValue', 'cardType']);
-        if ($errCode !== 1) {
-            return ['code' => $errCode];
+        $userInfo = $this->getServiceManager()->get('PassportService')
+            ->getProfileByUsername($data['username']);
+
+        if(!$userInfo) {
+            return ['code' => -3002];
         }
+        $user = $userInfo->getUserBasicInfo();
+
         $gold = $data['cardValue'] + $data['cardValue'] * $this->config['partner'][$data['client_id']]["rateBuyCard"];
         $msec = floor(microtime(true) * 1000);
     	$col = $this->getDb()->selectCollection(CardStore::COLLECTION_NAME);
     	try {
             $r1 = $this->getServiceManager()->get('PassportService')
-                    ->findOne([
+                    ->getMapper()->getBalance([
                         'username' => $data['username'],
-                        'balance.gold' => ['$gte' => $gold]
+                        'balance.gold' => ['$gte' => (int)$gold]
                     ]);
-            if(!$r1) {
+            if($r1['code'] != 1) {
                 return ['code' => -4015];
             }
 
-    		$user = ['id' => $data['passport_id'], 'username' => $data['username']];
     		$cardInfo = $col->findOneAndUpdate(
     				[
     					'card_type' => $data['cardType'],
-    					'card_value' => $data['cardValue'],
+    					'card_value' => (int)$data['cardValue'],
     					'status' => 1
     				],
     				[
     					'$set' => [
     						'user' => $user,
-    						'gold' => $gold,
+    						'gold' => (int)$gold,
     						'status' => -1,
     						'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
     					]
@@ -454,11 +463,12 @@ class PaymentGateway extends AbstractGateway
     		if($cardInfo) {
     			// minus user balance here
                 $userBalance = $this->getServiceManager()->get('PassportService')
-                    ->addGold($user['id'], ['gold' => -$gold]);
+                    ->addGold($user['id'], ['gold' => (int)-$gold]);
                 $cardInfo['balance'] = $userBalance;
                 $cardInfo['username'] = $data['username'];
     			return ['code' => 1, 'result' => (array)$cardInfo];
     		}
+    		return ['code' => -4003];//
     	} catch (\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
     		$this->getMailService()->sendAlertEmail($subject, $e);
@@ -467,5 +477,8 @@ class PaymentGateway extends AbstractGateway
     	return ['code' => -9999];
     }
 
-
+    public function recheck($data)
+    {
+        return ['code' => -9999];
+    }
 }

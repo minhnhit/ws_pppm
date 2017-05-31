@@ -103,12 +103,10 @@ class Payment extends AbstractService
                 $params = array_merge($params, $payTransaction['result']);
                 $params['gold'] = (int)$payTransaction['amount'] * $rateGold;
                 $point = (int)(intval($payTransaction['amount']) * $ratePoint);
+                $params['point'] = $point;
                 $bill = $this->mapper->updateTransaction($params);
                 if ($bill['result'] === 1) {
-                    $this->addPoint($params['passportId'], $point);
-
                     $msg = _t("charge_success") . $payTransaction['amount'] . ' VND. ';
-
                     $return = ['code' => 1, 'result' => [
                             'transactionId' => $transaction['transaction_id'],
                             'amount' => $payTransaction['amount'], 'gold' => $params['gold'], 'msg' => $msg
@@ -584,7 +582,12 @@ class Payment extends AbstractService
      */
     public function getBalance($params)
     {
-        $balance = $this->mapper->getBalance($params['passportId']);
+        $errCode = $this->validateParams($params, ['username']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        $user = $this->passportService->getProfileByUsername($params['username']);
+        $balance = $user->getBalance();
         return ['code' => 1, 'result' => ['balance' => $balance]];
     }
 
@@ -592,7 +595,7 @@ class Payment extends AbstractService
      * @param $params
      * @return mixed
      */
-    public function insertPromotion($params)
+    public function promotion($params)
     {
 		$result = $this->mapper->insertPromotion($params);
 		return $result;
@@ -621,6 +624,10 @@ class Payment extends AbstractService
      */
     public function buyCard($params)
     {
+        $errCode = $this->validateParams($params, ['username', 'cardValue', 'cardType']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
     	$result = $this->mapper->buyCard($params);
     	return $result;
     }

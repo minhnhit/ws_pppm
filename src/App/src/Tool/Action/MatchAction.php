@@ -5,12 +5,12 @@ namespace App\Tool\Action;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ChargeAction extends AbstractAction
+class MatchAction extends AbstractAction
 {
     /**
      * @SWG\Post(
-     *     path="/generate/charge",
-     *     description="Generate charge card data",
+     *     path="/generate/match",
+     *     description="Generate match data",
      *     operationId="__invoke",
      *     produces={"application/json"},
      *     tags={"Payment Generation Data"},
@@ -25,76 +25,44 @@ class ChargeAction extends AbstractAction
      *         enum={"b1","c1", "ttkn"}
      *     ),
      *     @SWG\Parameter(
-     *         name="cardNumber",
+     *         name="winner_username",
      *         in="formData",
-     *         description="Card Pin (Number)",
+     *         description="Winner Username",
      *         required=true,
-     *         type="string",
-     *     ),
-     *     @SWG\Parameter(
-     *         name="cardSerial",
-     *         in="formData",
-     *         description="Card Serial",
-     *         required=true,
-     *         type="string",
-     *     ),
-     *     @SWG\Parameter(
-     *         name="cardType",
-     *         in="formData",
-     *         description="Card type: VINA | MOBI | VT",
-     *         required=true,
-     *         type="string",
-     *         enum={"VINA","MOBI","VT"},
-     *         default="",
-     *     ),
-     *     @SWG\Parameter(
-     *         name="ctype",
-     *         in="formData",
-     *         description="Charge Type: gold | silver (cashout or not)",
-     *         required=true,
-     *         type="string",
-     *         enum={"gold","silver"},
-     *         default="silver",
-     *     ),
-     *     @SWG\Parameter(
-     *         name="agentTransactionId",
-     *         in="formData",
-     *         description="Only use service charge",
-     *         required=false,
      *         type="string",
      *         default=""
      *     ),
      *     @SWG\Parameter(
-     *         name="passportId",
+     *         name="loser_username",
      *         in="formData",
-     *         description="User ID",
-     *         required=false,
-     *         type="integer",
+     *         description="Loser user",
+     *         required=true,
+     *         type="string",
      *         default=""
      *     ),
      *     @SWG\Parameter(
-     *         name="username",
+     *         name="matchId",
      *         in="formData",
-     *         description="Username",
-     *         required=false,
+     *         description="Match ID",
+     *         required=true,
      *         type="string",
      *         default=""
      *     ),
      *     @SWG\Parameter(
      *         name="gold",
      *         in="formData",
-     *         description="Gold to exchange",
-     *         required=false,
+     *         description="Gold",
+     *         required=true,
      *         type="integer",
      *         default=""
      *     ),
      *     @SWG\Parameter(
-     *         name="serverId",
+     *         name="status",
      *         in="formData",
-     *         description="Server ID to exchange",
-     *         required=false,
-     *         type="string",
-     *         default=""
+     *         description="Match status",
+     *         required=true,
+     *         type="integer",
+     *         default="1"
      *     ),
      *     @SWG\Response(
      *         response=200,

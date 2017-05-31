@@ -26,6 +26,16 @@ abstract class AbstractService
     	$this->config = $container->get('config');
     }
 
+    public function getMapper()
+    {
+        return $this->mapper;
+    }
+
+    public function setMapper($mapper)
+    {
+        $this->mapper = $mapper;
+    }
+
     /**
      *
      * @param mixed $id_slug_code

@@ -121,8 +121,8 @@ class User implements \MongoDB\BSON\Persistable
         $this->source = $data['source'];
         $this->agent = $data['agent'];
         $this->sex = $data['sex'];
-        $this->mobile = $data['mobile'];
-        $this->email = $data['email'];
+        $this->mobile = isset($data['mobile'])? $data['mobile'] : null;
+        $this->email = isset($data['email']) ? $data['email'] : null;
         $this->identityNumber = $data['identityNumber'];
 
         if (isset($data['oauth'])) {
@@ -131,7 +131,7 @@ class User implements \MongoDB\BSON\Persistable
 
         $this->balance = $data['balance'];
         $this->status = $data['status'];
-        $this->verification_code = $data['verification_code'];
+        $this->verification_code = isset($data['verification_code'])? : null;
         if (is_int($data['create_date'])) {
             $this->create_date = $data['create_date'];
         } else {

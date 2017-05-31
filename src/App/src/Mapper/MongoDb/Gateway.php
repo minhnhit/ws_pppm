@@ -155,6 +155,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                         'upsert' => true
                     ]
                 );
+            if(is_array($ret)) {
+                return $ret['seq'];
+            }
+
             return $ret->seq;
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -244,9 +248,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         $user = new User();
         try {
             $userInfo = $this->getCollection()->findOne(['email' => $email]);
-            if ($userInfo) {
-                $user->bsonUnserialize($userInfo);
+            if (!$userInfo) {
+                return null;
             }
+            $user->bsonUnserialize($userInfo);
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
             $this->getMailService()->sendAlertEmail($subject, $e);
@@ -409,15 +414,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         ) {
             return ['code' => -1222];
         }
-        $data['password'] = $data['newPassword'];
+
         $currentUser = $this->findByUsername($data['username']);
         if (md5($data['oldPassword']) != $currentUser->getPassword()) {
             return ['code' => -3003, 'msg' => _t("old_password_not_match")];
-        }
-
-        $errCode = $this->validateParams($data, ['username', 'password']);
-        if ($errCode !== 1) {
-            return ['code' => $errCode];
         }
 
         $msec = floor(microtime(true) * 1000);
@@ -454,11 +454,6 @@ class Gateway extends AbstractGateway implements UserProviderInterface
 
     public function updateEmail($data)
     {
-        $errCode = $this->validateParams($data, ['username', 'email']);
-        if ($errCode !== 1) {
-            return ['code' => $errCode];
-        }
-
         $currentUser = $this->findByUsername($data['username']);
         if(!$currentUser) {
             return ['code' => -3002];
@@ -910,10 +905,6 @@ class Gateway extends AbstractGateway implements UserProviderInterface
      */
     public function resetPassword($data)
     {
-        $errCode = $this->validateParams($data, ['username', 'password', 'code']);
-        if ($errCode !== 1) {
-            return ['code' => $errCode];
-        }
         try {
             $user = $this->getCollection()->updateOne(
                 ['username' => $data['username'], 'verification_code' => $data['code']],
@@ -1074,14 +1065,21 @@ class Gateway extends AbstractGateway implements UserProviderInterface
 
     public function addGold($uid, array $balance)
     {
+        $incData = [];
+        foreach($balance as $k => $num) {
+            $incData['balance.'.$k] = $num;
+        }
+
+        $conditions = [
+            '_id' => new \MongoDB\BSON\ObjectID($uid),
+        ];
+
         $msec = floor(microtime(true) * 1000);
         try {
             $balance = $this->getCollection()->findOneAndUpdate(
+                $conditions,
                 [
-                    '_id' => $uid,
-                ],
-                [
-                    'balance' => ['$inc' => $balance],
+                    '$inc' => $incData,
                     '$set' => [
                         'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
                     ]
@@ -1092,6 +1090,23 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ]
             );
             return $balance;
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
+
+        $balance = $this->getCollection()->findOne($conditions, ['projection' => [ 'balance' => 1 ]]);
+        return $balance;
+    }
+
+    public function getBalance(array $conditions)
+    {
+        try {
+            $ret = $this->getCollection()->findOne($conditions, ['projection' => [ 'balance' => 1 ]]);
+            if ($ret) {
+                return ['code' => 1, 'balance' => $ret];
+            }
+            return ['code' => -4015];
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
             $this->getMailService()->sendAlertEmail($subject, $e);

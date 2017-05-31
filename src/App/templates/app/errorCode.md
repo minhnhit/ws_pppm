@@ -40,5 +40,6 @@ Error Code
 |-4015   | Amount not enough |
 |-4016   | Invalid role name |
 |-4017   | Transaction exists |
+|-4018   | Duplicated match_id |
 |
 |-9999   | Server Error |
