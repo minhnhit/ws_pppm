@@ -9,6 +9,7 @@ Error Code
 | -2     | Invalid Client Id | 
 | -3     | Invalid App Key     | 
 | -4     | Invalid Encrypted Data     | 
+|-1003   | Only C1 |
 |-1004   | Invalid username |
 |-1005   | Invalid password |
 |-1011   | Invalid Card Number|

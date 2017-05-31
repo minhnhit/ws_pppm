@@ -371,7 +371,15 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
 
-        $data['username'] = $data['client'].floor(microtime(true) * 1000);
+        if(!isset($data['username'])) {
+            $data['username'] = $data['client']  . time();
+        }else {
+            // check user exists?
+            $u = $this->findByUsername($data['username']);
+            if($u) {
+                return ['code' => -3000];
+            }
+        }
 
         $oauth = [strtolower($data['client']) => $data['oauth_id']];
 

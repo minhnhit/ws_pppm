@@ -33,7 +33,8 @@ API Passport
  dataDecrypted = {
     "token": "jQidasggfDSFGerGHE",
     "uid": 123213,
-    "username": "utest1"
+    "username": "utest1",
+    "email": "abc@gmail.com"
  }
 ```
 ___________________________________________________________
@@ -70,7 +71,8 @@ ___________________________________________________________
  dataDecrypted = {
     "token": "jQidasggfDSFGerGHE",
     "uid": 123213,
-    "username": "utest1"
+    "username": "utest1",
+    "email": "abc@gmail.com"
  }
 ```
 ___________________________________________________________
@@ -157,11 +159,13 @@ ___________________________________________________________
 ###### Parameters
 | Param         | Data Type  | Required | Value |
 | ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
 | email         | String     | true     |Email  |
 
 ###### Example encrypt parameters
 ``` 
  params = {
+    "username": "abc123",
     "email": "abc@gmail.com",
  };
  
@@ -188,11 +192,13 @@ ___________________________________________________________
 ###### Parameters
 | Param         | Data Type  | Required | Value |
 | ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
 | mobile        | String     | true     |**/^[d]{0,13}$/**  |
 
 ###### Example encrypt parameters
 ``` 
  params = {
+    "username": "abc123",
     "mobile": "0987654321",
  };
  
