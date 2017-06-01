@@ -87,7 +87,7 @@ ___________________________________________________________
 | Param         | Data Type  | Required | Value |
 | ------------- | ---------- | -------- | ----- |
 | oauth_id      | String     | true     |**/[\s\S]/**|
-| channel       | String     | true     |[**facebook, google, twitter**]|
+| client        | String     | true     |[**facebook, google, twitter**]|
 | source        | String     | false    |**/^([A-Z0-9-]{1,25})$/**|
 | agent         | String     | false    |**/^[A-Z0-9-]{0,30}$/**|   
 
@@ -95,7 +95,7 @@ ___________________________________________________________
 ``` 
  params = {
     "oauth_id": "abc123sdfsaf",
-    "channel": "facebook",
+    "client": "facebook",
     "source": "568E",
     "agent": "abc"
  };
@@ -111,9 +111,45 @@ ___________________________________________________________
     "username": "utest1"
  }
 ```
+
+
+## IV. Link Social Account TODO
+
+> URL: [https://{domain}/api/link-oauth](https://{domain}/api/link-oauth)
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**|
+| oauth_id      | String     | true     |**/[\s\S]/**|
+| client        | String     | true     |[**facebook, google, twitter**]|
+| source        | String     | false    |**/^([A-Z0-9-]{1,25})$/**|
+| agent         | String     | false    |**/^[A-Z0-9-]{0,30}$/**|   
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "abc123",
+    "oauth_id": "abc123sdfsaf",
+    "client": "facebook",
+    "source": "568E",
+    "agent": "abc"
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+###### Result Data
+```
+ {
+    "code" : "ErrorCode", 
+ }
+```
 ___________________________________________________________
 
-## IV. Change Password
+## V. Change Password
 
 > URL: [https://{domain}/api/change-pass](https://{domain}/api/change-pass)
 
@@ -146,9 +182,80 @@ __Output Data (JSON Data)__
     "code" : "ErrorCode", 
 }
 ```
+
 ___________________________________________________________
 
-## V. Insert Email
+## VI. Forgot Password
+
+> URL: [https://{domain}/api/forgot-pass](https://{domain}/api/forgot-pass)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**|
+
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "abc123"
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+ dataDecrypted = {
+    "email": "abc@gmail.com",
+    "code": "12323DSFDGS"
+ }
+```
+
+___________________________________________________________
+
+## VII. Reset Password
+
+> URL: [https://{domain}/api/reset-pass](https://{domain}/api/reset-pass)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**|
+| password      | String     | true     |**/[\s\S]{6,32}/**|
+| code          | String     | true     ||
+
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "abc123",
+    "password": "plaintext",
+    "code": "12323DSFDGS"
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+ {
+    "code" : "ErrorCode", 
+ }
+```
+___________________________________________________________
+
+## VIII. Insert/Update Email
 
 > URL: [https://{domain}/api/update-email](https://{domain}/api/update-email)
 
@@ -178,6 +285,38 @@ __Output Data (JSON Data)__
 {
     "code" : "ErrorCode", 
 }
+```
+
+___________________________________________________________
+
+## IX. Get Email
+
+> URL: [https://{domain}/api/get-email](https://{domain}/api/get-email)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "abc123"
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+ dataDecrypted = {
+    "email": "abc@gmail.com"
+ }
 ```
 ___________________________________________________________
 

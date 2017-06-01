@@ -9,7 +9,7 @@ Error Code
 | -2     | Invalid Client Id | 
 | -3     | Invalid App Key     | 
 | -4     | Invalid Encrypted Data     | 
-|-1003   | Only C1 |
+|-1003   | Oauth not found (Only C1) |
 |-1004   | Invalid username |
 |-1005   | Invalid password |
 |-1011   | Invalid Card Number|
@@ -21,12 +21,13 @@ Error Code
 |-1029   | Invalid Old Email|
 |-1031   | Invalid Mobile Number|
 |-1081   | Invalid OauthId|
-|-1082   | Invalid oauth channel |
+|-1082   | Invalid oauth client |
 |-3000   | Username exist|
 |-3001   | User has banned |
 |-3002   | User not found |
 |-3003   | Password not matched |
 |-3004   | Email exist |
+|-3005   | Oauth ID exists |
 |
 |-4003   | Card not exit or Used |
 |-4004   | Card used|
