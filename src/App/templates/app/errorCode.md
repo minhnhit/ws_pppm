@@ -28,6 +28,7 @@ Error Code
 |-3004   | Email exist |
 |-3005   | Oauth ID exists |
 |
+|-4002   | Card:out-of-stock |
 |-4003   | Card not exit or Used |
 |-4004   | Card used|
 |-4005   | Card locked |
