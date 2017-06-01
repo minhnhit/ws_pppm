@@ -34,8 +34,10 @@ class ApiAction implements MiddlewareInterface
      *         type="string",
      *         @SWG\Items(type="string"),
      *         collectionFormat="csv",
-     *         enum={"login","register","oauth","reset-pass","forgot-pass","change-pass","update-email",
-     *         "update-mobile", "charge", "exchange","get-balance","buy-card","update-match","promotion","recheck"}
+     *         enum={"login","register","oauth","reset-pass","forgot-pass","change-pass","update-email", "get-email",
+     *         "update-mobile", "charge", "exchange","get-balance","buy-card","update-match","promotion","recheck",
+     *         "update-username"
+     *     }
      *     ),
 	 *     @SWG\Parameter(
 	 *         name="client_id",

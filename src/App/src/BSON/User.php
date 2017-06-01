@@ -206,7 +206,7 @@ class User implements \MongoDB\BSON\Persistable
      */
     public function setUsername($username)
     {
-        $this->username = $username;
+        $this->username = (string)$username;
     }
 
     public function getPassword()

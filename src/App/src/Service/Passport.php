@@ -42,6 +42,16 @@ class Passport extends AbstractService
     	$result = $this->mapper->loginOauth($params);
     	return $result;
     }
+
+    public function linkOauth($params)
+    {
+        $errCode = $this->validateParams($params, ['username', 'oauth_id', 'client']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        $result = $this->mapper->linkOauth($params);
+        return $result;
+    }
 	
     public function update($params)
     {
@@ -49,13 +59,22 @@ class Passport extends AbstractService
     	return $result;
     }
     
+    public function getProfileById($id)
+    {
+    	return $this->mapper->getById($id);
+    }
+
     public function getProfileByUsername($username)
     {
-    	return $this->mapper->findByUsername($username);
+        return $this->mapper->findByUsername($username);
     }
 
     public function forgotPass($params)
     {
+        $errCode = $this->validateParams($params, ['username']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
         $result = $this->mapper->forgotPassword($params);
         return $result;
     }
@@ -91,6 +110,20 @@ class Passport extends AbstractService
         return $result;
     }
 
+    /**
+     * @param $params
+     * @return array
+     */
+    public function getEmail($params)
+    {
+        $errCode = $this->validateParams($params, ['username']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        $result = $this->mapper->getEmail($params);
+        return $result;
+    }
+
     public function updateMobile($params)
     {
         $result = $this->mapper->updateMobile($params);
@@ -109,8 +142,12 @@ class Passport extends AbstractService
         return $result;
     }
 
-    public function getBalance($username)
+    public function getBalance($params)
     {
-
+        $errCode = $this->validateParams($params, ['username']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        return $this->mapper->getBalance($params);
     }
 }

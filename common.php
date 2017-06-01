@@ -47,14 +47,22 @@ function generateRandomString($length = 10) {
 
 function RSAEncryptData($client, $source)
 {
-	$pub_key=openssl_pkey_get_public(file_get_contents("./data/ssh/".$client."/public_key.pub"));
+    $pubKey = "./data/ssh/".$client."/public_key.pub";
+    if(!file_exists($pubKey)){
+        $pubKey = "./data/ssh/public_key.pub";
+    }
+    $pub_key=openssl_pkey_get_public(file_get_contents($pubKey));
 	openssl_public_encrypt($source,$crypttext,$pub_key);//, OPENSSL_PKCS1_OAEP_PADDING);
 	return(base64_encode($crypttext));
 }
 
 function RSADecryptData($client, $source, $passphrase = null)
 {
-	$priv_key=file_get_contents("./data/ssh/".$client."/private_key.pem");
+    $privKey = "./data/ssh/".$client."/private_key.pem";
+    if(!file_exists($privKey)) {
+        $privKey = "./data/ssh/private_key.pem";
+    }
+	$priv_key=file_get_contents($privKey);
 	$res = openssl_pkey_get_private($priv_key);
 	if($passphrase) {
 		$res = openssl_pkey_get_private($priv_key, $passphrase);

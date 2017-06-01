@@ -42,7 +42,7 @@ class Util
         if(!file_exists($priv)) {
             $priv = './data/ssh/private_key.pem';
         }
-        var_dump($pub);die;
+
         try {
             $rsa = Rsa::factory([
                 'public_key'    => $pub,

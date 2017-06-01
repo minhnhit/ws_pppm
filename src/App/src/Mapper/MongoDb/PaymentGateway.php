@@ -477,8 +477,78 @@ class PaymentGateway extends AbstractGateway
     	return ['code' => -9999];
     }
 
-    public function recheck($data)
+    public function recheckTransaction($data)
     {
+        $bal = [
+            'gold' => 0, 'silver' => 0, 'point' => 0
+        ];
+
+        $btype = isset($data['ctype']) ? $data['ctype'] : 'silver';
+        if (strtolower($btype) === 'silver') {
+            $collectionName = Card::COLLECTION_NAME;
+        }else {
+            $collectionName = Card::CASHOUT_COLLECTION_NAME;
+        }
+        $col = $this->getDb()->selectCollection($collectionName);
+        $transactionInfo = $col->findOne(['_id' => new \MongoDB\BSON\ObjectID(strtolower($data['transactionId']))]);
+        if($transactionInfo) {
+            if($transactionInfo['status'] == 0) {
+                $paygate = $this->getServiceManager()->get('PaymentService')
+                    ->getPaygateByType($transactionInfo['card_type'], $transactionInfo['provider']['name']);
+                $paygateConfigInfo = json_decode($paygate['partner_info'], true);
+                $params = ['payload' => $data['transactionId']];
+                $rest = \PaymentApi\Payment::create(
+                    ucwords(strtolower($paygate['code'])),
+                    $paygateConfigInfo
+                )->recheck($params);
+
+                if ($rest['code'] == 1) {
+                    $rateGold = isset($paygate['rate_gold']) ? $paygate['rate_gold'] : 0.01;
+                    $gold = (int)$rest['amount'] * $rateGold;
+                    $data['gold'] = $gold;
+                    $data['amount'] = $rest['amount'];
+                    $data['provider'] = [
+                        'transaction_id' => $rest['providerTransactionId'],
+                        'name' => $transactionInfo['provider']['name'],
+                        'message' => $rest['providerMessage'],
+                        'status' => $rest['providerStatus']
+                    ];
+                    $trans = $this->updateTransaction($data);
+
+                    if ($trans['code'] == 1) {
+                        $balanceInfo = $this->getServiceManager()->get('PassportService')
+                            ->getBalance(['username' => $transactionInfo['user']['username']]);
+                        
+                        if ($balanceInfo['code'] == 1) {
+                            $bal = $balanceInfo['result']['balance'];
+                        }
+                        $ret = ['code' => 1, 'result' => [
+                            'amount' => $rest['amount'],
+                            'balance' => $bal,
+                            'transactionId' => $data['transactionId']
+                        ]];
+                        return $ret;
+                    }
+                }
+            }elseif($transactionInfo['status'] == 1) {
+                $balanceInfo = $this->getServiceManager()->get('PassportService')
+                    ->getBalance(['username' => $transactionInfo['user']['username']]);
+
+                if ($balanceInfo['code'] == 1) {
+                    $bal = $balanceInfo['result']['balance'];
+                }
+                $ret = ['code' => 1, 'result' => [
+                    'amount' => $transactionInfo['amount'],
+                    'balance' => $bal,
+                    'transactionId' => $data['transactionId']
+                ]];
+                return $ret;
+            }else {
+                return ['code' => -4020];
+            }
+        }else {
+            return ['code' => -4019];
+        }
         return ['code' => -9999];
     }
 }

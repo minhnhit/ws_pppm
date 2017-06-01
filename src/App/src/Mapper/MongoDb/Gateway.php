@@ -231,6 +231,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $userInfo = $this->getCollection()->findOne(['username' => $username]);
             if ($userInfo) {
                 $user->bsonUnserialize($userInfo);
+            }else {
+                return null;
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -271,6 +273,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             if ($userInfo) {
                 $hydrator = new \Zend\Hydrator\ClassMethods();
                 $user = $hydrator->hydrate($userInfo, new User());
+            }else {
+                return null;
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -305,7 +309,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
 
         $user = new User(['id' => $this->getNextSequence('passport_id')]);
-        $user->setUsername($data['username']);
+        $user->setUsername(strtolower($data['username']));
         $user->setPassword(md5($data['password']));
         $source = isset($data['source'])? : null;
         $user->setSource($source);
@@ -371,12 +375,14 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
 
+        $username = isset($data['username'])?: time();
         if(!isset($data['username'])) {
-            $data['username'] = $data['client']  . time();
-        }else {
-            // check user exists?
-            $u = $this->findByUsername($data['username']);
-            if($u) {
+            $username = time();
+        }
+        // check user exists?
+        $u = $this->findByUsername(strtolower($username));
+        if($u) {
+            if(isset($data['username'])) {
                 return ['code' => -3000];
             }
         }
@@ -384,7 +390,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         $oauth = [strtolower($data['client']) => $data['oauth_id']];
 
         $user = new User(['id' => $this->getNextSequence('passport_id')]);
-        $user->setUsername($data['username']);
+        $user->setUsername(strtolower($username));
         $user->setOauth($oauth);
         $user->setSource($data['source']);
         if (isset($data['agent'])) {
@@ -406,9 +412,104 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         return ['code' => -3002, 'msg' => _t('user_not_found')];
     }
 
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function linkOauth($data)
+    {
+        if(!is_array($data['oauth_id'])) {
+            $data['oauth_id'] = explode(",", $data['oauth_id']);
+        }
+
+        if(!isset($data['source'])) {
+            $data['source'] = null;
+        }
+
+        $userInfo = $this->findByUsername(strtolower($data['username']));
+        if(!$userInfo) {
+            return ['code' => -3002];
+        }
+
+        $filter = ['oauth.' . $data['client'] => ['$in' => $data['oauth_id']]];
+
+        $msec = floor(microtime(true) * 1000);
+        // check username exists?
+        try {
+            $u = $this->getCollection()->findOne($filter);
+            if ($u) {
+                return ['code' => -3005];
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+            return ['code' => -9999];
+        }
+
+        $oauth = $userInfo->getOauth();
+        $tmp = array_merge($oauth[strtolower($data['client'])], $data['oauth_id']);
+        $oauth[strtolower($data['client'])] = $tmp;
+
+        try {
+            $u = $this->getCollection()->findOneAndUpdate(
+                [
+                    'username' => $data['username']
+                ],
+                [ '$set' => [
+                    'oauth' => $oauth,
+                    'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
+                ]
+                ],
+                ['returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER]
+            );
+            if($u) {
+                return ['code' => 1];
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
+        return ['code' => -3002, 'msg' => _t('user_not_found')];
+    }
+
     public function update($entity)
     {
     }
+
+    public function updateUsername($data)
+    {
+        $currentUser = $this->findByUsername($data['currentUsername']);
+        if(!$currentUser) {
+            return ['code' => -3002];
+        }
+
+        if($currentUser->getUsername() != $data['username']) {
+            // check username exists?
+            $username = $this->findByUsername($data['username']);
+            if($username) {
+                return ['code' => -3000];
+            }
+        }
+
+        try {
+            $user = $this->getCollection()->updateOne(
+                [
+                    '_id' => $currentUser->getId()
+                ],
+                [ '$set' => [
+                    'username' => $data['username']
+                ]]
+            );
+            if ($user->getMatchedCount() > 0 && $user->getModifiedCount() > 0) {
+                return ['code' => 1, 'msg' => _t("change_username_success")];
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
+        return ['code' => -9999, 'msg' => _t('change_username_failed')];
+    }
+
     /**
      *
      * @param unknown $data
@@ -501,7 +602,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $subject = "System Error: MongoDB Exception";
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
-        return ['code' => -9999, 'msg' => _t('change_email_fail')];
+        return ['code' => -9999, 'msg' => _t('change_email_failed')];
     }
 
     public function updateMobile($data)
@@ -900,7 +1001,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $subject = "System Error: MongoDB Exception";
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
-        return false;
+        return ['code' => -3002];
     }
 
     /**
@@ -932,6 +1033,21 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
 
         return ['code' => -3002];
+    }
+
+    public function getEmail($params)
+    {
+        $email = null;
+        try {
+            $userInfo = $this->getCollection()->findOne(['username' => $params['username']]);
+            if ($userInfo) {
+                $email = $userInfo['email'];
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
+        return ['code' => 1, 'result' => ['email' => $email]];
     }
 
     public function getOtp($ftype, $currentUser)
@@ -1112,7 +1228,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         try {
             $ret = $this->getCollection()->findOne($conditions, ['projection' => [ 'balance' => 1 ]]);
             if ($ret) {
-                return ['code' => 1, 'balance' => $ret];
+                return ['code' => 1, 'result' => ['balance' => $ret]];
             }
             return ['code' => -4015];
         } catch (\Exception $e) {

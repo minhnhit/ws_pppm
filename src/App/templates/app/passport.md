@@ -320,7 +320,7 @@ __Output Data (JSON Data)__
 ```
 ___________________________________________________________
 
-## VI. Insert Mobile
+## X. Insert Mobile
 
 > URL: [https://{domain}/api/update-mobile](https://{domain}/api/update-mobile)
 
@@ -353,7 +353,7 @@ __Output Data (JSON Data)__
 ```
 ___________________________________________________________
 
-## VII. Insert CMND
+## XI. Insert CMND
 
 > URL: [https://{domain}/api/update-identity-number](https://{domain}/api/update-identity-number)
 
@@ -364,16 +364,15 @@ ___________________________________________________________
 ###### Parameters
 | Param         | Data Type  | Required | Value |
 | ------------- | ---------- | -------- | ----- |
-| identityNumber__identity_number        | String     | true     |**/^[d]{0,12}$/**  |
-| identityNumber__date        | String     | true     |**dd-mm-yyyy**  |
-| identityNumber__address       | String     | true     |**/^.{0,50}$/**  |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+| identityNumber| String     | true     |**/^[\s\S]$/**  |
+
 
 ###### Example encrypt parameters
 ``` 
  params = {
-    "identityNumber__identity_number": "012345789",
-    "identityNumber__date": "12-12-2000",
-    "identityNumber__address": "Ha Noi"
+    "identityNumber": "012345789",
+    "username": "test123",
  };
  
  // @see: Input Data

@@ -638,6 +638,11 @@ class Payment extends AbstractService
      */
     public function recheck($params)
     {
+        $errCode = $this->validateParams($params, ['transactionId']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        $params['ctype'] = isset($params['ctype'])?: 'silver';
         $result = $this->mapper->recheckTransaction($params);
         return $result;
     }

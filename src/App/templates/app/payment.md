@@ -231,7 +231,40 @@ ___________________________________________________________
 ```
 ___________________________________________________________
 
-## VII. Get Config
+## VII. Recheck Transaction
+
+> URL: [https://{domain}/api/recheck](https://{domain}/api/recheck)
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| transactionId | String     | true     | |
+| ctype         | String     | true     | **"gold"** OR **"silver"** <br/> Default: silver. <br/> *Note:* "gold" => cashout   |
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "transactionId": "sdfsgsdg45346",
+    "ctype": gold,
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+
+###### Result Data
+```
+ dataDecrypted = {
+    "transactionId": "sdfsgsdg45346",
+    "balance" => {"gold": 12321, "point": 123, "silver": 123},
+    "amount": 10000
+ }
+```
+
+
+## VIII. Get Config
 
 > URL: [https://{domain}/payment/get-config](https://{domain}/payment/get-config)
 

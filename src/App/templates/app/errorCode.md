@@ -9,7 +9,6 @@ Error Code
 | -2     | Invalid Client Id | 
 | -3     | Invalid App Key     | 
 | -4     | Invalid Encrypted Data     | 
-|-1003   | Oauth not found (Only C1) |
 |-1004   | Invalid username |
 |-1005   | Invalid password |
 |-1011   | Invalid Card Number|
@@ -43,5 +42,7 @@ Error Code
 |-4016   | Invalid role name |
 |-4017   | Transaction exists |
 |-4018   | Duplicated match_id |
+|-4019   | Transaction not found |
+|-4020   | Transaction failed |
 |
 |-9999   | Server Error |

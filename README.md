@@ -136,3 +136,9 @@ Please note that the installer tests remove installed config files and templates
 before and after running the tests.
 
 Before contributing read [the contributing guide](CONTRIBUTING.md).
+
+
+____________
+PC-Company Pubkey
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDfccSIvx0pw8qy/F97SfU62EKUB4TQb24ULPlxWdvmoKIaFQuwpAvK4oZjYerdzyZP6dumUsL4XYa6eSnvJdmEPOIYbtU46ePRF/zIHKkD9s6jd0najvsZv0VhHJVri1fOGgIMhg/VvAo20ujNYXFtpFZJwJAkFdxkhXo63Zb99tqnUcwMHFlLYcV2azfHnrWB5Ojvuo2S2xlXWfGbnSEA3ArYFHsT41WsB0mfvmflgoZgOe7YNmBQGii59/ktDCEhmTQsAXcfoBnBb0+Pg5P2z9Qdn0rqDnOcmIvlIq/YvjHZkN9nT5BqJGeSag05cGT9Gvwxe92a4SlPGK2AKhGz admin@DESKTOP-AL9RNQE
