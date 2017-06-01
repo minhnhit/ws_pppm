@@ -126,9 +126,11 @@ class PaymentGateway extends AbstractGateway
     		);
     	
     		if($trans) {
-    		    // + balance
-                $this->getServiceManager()->get('PassportService')
-                    ->addGold($data['user']['id'], ['gold' => (int)$data['gold'], 'point' => (int)$data['point']]);
+    		    if($btype != 'silver') {
+                    // + balance
+                    $this->getServiceManager()->get('PassportService')
+                        ->addGold($data['user']['id'], ['gold' => (int)$data['gold'], 'point' => (int)$data['point']]);
+                }
     			return ['code' => 1, 'result' => (array)$trans];
 	    	}
     	}catch(\Exception $e) {
@@ -281,9 +283,11 @@ class PaymentGateway extends AbstractGateway
     		$col = $this->getDb()->selectCollection(Sms::COLLECTION_NAME);
     		$res = $col->insertOne($sms);
     		if($res) {
+    		    /*
     			// + balance here
                 $this->getServiceManager()->get('PassportService')
                      ->addGold($data['user']['id'], ['gold' => (int)$data['gold']]);
+    		    */
                 return ['code' => 1, 'msg' => 'Ban da nap thanh cong ' . $data['amount'],
                         'transaction_id' => $res->getInsertedId()
                     ];
