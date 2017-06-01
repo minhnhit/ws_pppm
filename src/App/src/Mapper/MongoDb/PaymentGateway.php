@@ -468,12 +468,11 @@ class PaymentGateway extends AbstractGateway
                 $cardInfo['username'] = $data['username'];
     			return ['code' => 1, 'result' => (array)$cardInfo];
     		}
-    		return ['code' => -4003];//
+    		return ['code' => -4002];//
     	} catch (\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
     		$this->getMailService()->sendAlertEmail($subject, $e);
     	}
-    	
     	return ['code' => -9999];
     }
 
