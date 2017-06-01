@@ -113,7 +113,7 @@ ___________________________________________________________
 ```
 
 
-## IV. Link Social Account TODO
+## IV. Link Social Account
 
 > URL: [https://{domain}/api/link-oauth](https://{domain}/api/link-oauth)
 

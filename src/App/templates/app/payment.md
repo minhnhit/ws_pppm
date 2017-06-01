@@ -130,6 +130,7 @@ ___________________________________________________________
 | loser_username     | String     | true     |**/^[a-z0-9]{6,24}$/**|
 | matchId            | mixed      | true     | **/^[d]$/** |
 | gold               | Integer    | true     | **/^[d]$/**|
+| status             | Integer    | true     | **1** OR **2** <br/> *Note:* 2: Deuce  |
 
 ###### Example encrypt parameters
 ``` 
@@ -137,7 +138,8 @@ ___________________________________________________________
     "winner_username": "winner1",
     "loser_username": "loser1",
     "gold": 100
-    "match_id": 12321213
+    "matchId": 12321213,
+    "status": 1
  };
  
  // @see: Input Data
