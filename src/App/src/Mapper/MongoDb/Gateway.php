@@ -397,7 +397,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
 
             if ($u) {
                 if(is_object($u)) {
-                    $user = (array)$u;
+                    $u = (array)$u;
                 }
 
                 if (is_array($u)) {
@@ -524,7 +524,15 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ['returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER]
             );
             if($u) {
-                return ['code' => 1];
+                if(is_object($u)) {
+                    $u = (array)$u;
+                }
+
+                if (is_array($u)) {
+                    $user = new User();
+                    $user->bsonUnserialize($u);
+                }
+                return ['code' => 1, 'result' => $user->getUserBasicInfo()];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -1024,12 +1032,12 @@ class Gateway extends AbstractGateway implements UserProviderInterface
      * @param string $type
      * @return boolean
      */
-    public function forgotPassword($username)
+    public function forgotPassword($params)
     {
         $code = strtoupper(substr(md5(microtime()), 0, 5));
         try {
             $ret = $this->getCollection()->findOneAndUpdate(
-                ['username' => $username],
+                ['username' => $params['username']],
                 [ '$set' => [
                         'verification_code' => $code,
                     ]
@@ -1039,6 +1047,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
                 ]
             );
+
             if ($ret) {
                 if(is_object($ret)) {
                     $user = (array)$ret;
@@ -1051,7 +1060,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 $email = $u->getEmail();
                 if ($email) {
                     //send email
-                    $this->getServiceManager()->get('mailService')->sendEmail($email, $username, $code);
+                    $this->getServiceManager()->get('mailService')->sendEmail($email, $params['username'], $code);
                 }
                 return ['code' => 1, 'result' => ['email' => $email, 'code' => $code]];
             }
