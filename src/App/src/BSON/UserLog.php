@@ -74,10 +74,14 @@ class UserLog implements \MongoDB\BSON\Persistable
             $this->last_login = intval($data['last_login']->__toString()/1000);
         }
 
-        if (is_int($data['first_login'])) {
-            $this->first_login = $data['first_login'];
-        } else {
-            $this->first_login = intval($data['first_login']->__toString()/1000);
+        if($data['first_login']) {
+            if (is_int($data['first_login'])) {
+                $this->first_login = $data['first_login'];
+            } else {
+                $this->first_login = intval($data['first_login']->__toString() / 1000);
+            }
+        }else {
+            $this->first_login = $this->create_date;
         }
 
         if(isset($data['last_pay'])) {
