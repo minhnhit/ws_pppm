@@ -1035,11 +1035,13 @@ class Gateway extends AbstractGateway implements UserProviderInterface
     public function forgotPassword($params)
     {
         $code = strtoupper(substr(md5(microtime()), 0, 5));
+        $msec = floor(microtime(true) * 1000);
         try {
             $ret = $this->getCollection()->findOneAndUpdate(
                 ['username' => $params['username']],
                 [ '$set' => [
                         'verification_code' => $code,
+                        'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
                     ]
                 ],
                 [
@@ -1081,13 +1083,15 @@ class Gateway extends AbstractGateway implements UserProviderInterface
      */
     public function resetPassword($data)
     {
+        $msec = floor(microtime(true) * 1000);
         try {
             $user = $this->getCollection()->updateOne(
                 ['username' => $data['username'], 'verification_code' => $data['code']],
                 ['$set' =>
                     [
                         'password' => md5($data['password']),
-                        'verification_code' => null
+                        'verification_code' => null,
+                        'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
                     ]
                 ]
             );

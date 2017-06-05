@@ -281,7 +281,7 @@ class MailService
                 'username' => $username,
                 'email' => $email,
                 'code' => $code,
-                'subject' => '[568E] Verify your email address',
+                'subject' => 'Verify your email address',
             ));
         $mail->addTo($email, $username);
         $mail->setTemplateName($template);
