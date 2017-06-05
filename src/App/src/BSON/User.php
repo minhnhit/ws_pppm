@@ -455,14 +455,13 @@ class User implements \MongoDB\BSON\Persistable
      */
     public function setCreateDate($is_int = false)
     {
-        $this->create_date = new \MongoDB\BSON\UTCDateTime($is_int);
-        /*
+        //$this->create_date = new \MongoDB\BSON\UTCDateTime($is_int);
         $msec = floor(microtime(true) * 1000);
         $this->create_date = new \MongoDB\BSON\UTCDateTime($msec);
         if ($is_int) {
             $this->create_date = intval($this->create_date->__toString()/1000);
         }
-        */
+
     }
 
     /**
@@ -478,14 +477,14 @@ class User implements \MongoDB\BSON\Persistable
      */
     public function setUpdateDate($is_int = false)
     {
-        $this->update_date = new \MongoDB\BSON\UTCDateTime($is_int);
-        /*
+        //$this->update_date = new \MongoDB\BSON\UTCDateTime($is_int);
+
         $msec = floor(microtime(true) * 1000);
         $this->update_date = new \MongoDB\BSON\UTCDateTime($msec);
         if ($is_int) {
             $this->update_date = intval($this->update_date->__toString()/1000);
         }
-        */
+
     }
 
     public function getSource()
