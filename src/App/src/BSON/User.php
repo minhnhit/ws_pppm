@@ -144,16 +144,20 @@ class User implements \MongoDB\BSON\Persistable
             $this->update_date = intval($data['update_date']->__toString()/1000);
         }
 
-        if (is_int($data['last_login'])) {
-            $this->last_login = $data['last_login'];
-        } else {
-            $this->last_login = intval($data['last_login']->__toString()/1000);
+        if(isset($data['last_login'])) {
+            if (is_int($data['last_login'])) {
+                $this->last_login = $data['last_login'];
+            } else {
+                $this->last_login = intval($data['last_login']->__toString() / 1000);
+            }
         }
 
-        if (is_int($data['first_login'])) {
-            $this->first_login = $data['first_login'];
-        } else {
-            $this->first_login = intval($data['first_login']->__toString()/1000);
+        if(isset($data['first_login'])) {
+            if (is_int($data['first_login'])) {
+                $this->first_login = $data['first_login'];
+            } else {
+                $this->first_login = intval($data['first_login']->__toString() / 1000);
+            }
         }
 
         if(isset($data['last_pay'])) {
