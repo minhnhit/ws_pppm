@@ -26,11 +26,7 @@ class Promotion implements \MongoDB\BSON\Persistable
 
     public function __construct($data = [])
     {
-        if(isset($data['id'])) {
-        	$this->id = $data['id'];
-        }else {
-        	$this->id = new \MongoDB\BSON\ObjectID;
-        }
+        $this->id = new \MongoDB\BSON\ObjectID;
 
         // Get current time in milliseconds since the epoch
         $msec = floor(microtime(true) * 1000);

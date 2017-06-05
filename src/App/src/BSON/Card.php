@@ -8,6 +8,8 @@ class Card implements \MongoDB\BSON\Persistable
 	
     private $id;
 
+    private $transaction_id;
+
     private $user = [
         'id' => null,
         'username' => null,
@@ -41,11 +43,8 @@ class Card implements \MongoDB\BSON\Persistable
 
     public function __construct($data = [])
     {
-        if(isset($data['id'])) {
-        	$this->id = $data['id'];
-        }else {
-        	$this->id = new \MongoDB\BSON\ObjectID;
-        }
+       	$this->id = new \MongoDB\BSON\ObjectID;
+       	$this->transaction_id = strtoupper($this->id->__toString());
 
         // Get current time in milliseconds since the epoch
         $msec = floor(microtime(true) * 1000);
@@ -57,6 +56,7 @@ class Card implements \MongoDB\BSON\Persistable
     {
         return [
             '_id'         => $this->id,
+            'transaction_id' => $this->transaction_id,
             'user'        => $this->user,
             'card_pin'    => $this->card_pin,
             'card_serial' => $this->card_serial,
@@ -74,6 +74,7 @@ class Card implements \MongoDB\BSON\Persistable
     public function bsonUnserialize(array $data)
     {
         $this->id = $data['_id'];
+        $this->transaction_id = $data['transaction_id'];
         $this->user = (array)$data['user'];
         $this->card_pin = $data['card_pin'];
         $this->card_serial = $data['card_serial'];
@@ -104,6 +105,16 @@ class Card implements \MongoDB\BSON\Persistable
     public function setId($id)
     {
     	$this->id = $id;
+    }
+
+    public function getTransactionId()
+    {
+        return $this->transaction_id;
+    }
+
+    public function setTransactionId($transId)
+    {
+        $this->transaction_id = $transId;
     }
     
     public function getUser()

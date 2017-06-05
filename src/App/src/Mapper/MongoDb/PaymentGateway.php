@@ -1,6 +1,7 @@
 <?php
 namespace App\Mapper\MongoDb;
 
+use App\BSON\UserLog;
 use App\Mapper\AbstractGateway;
 use App\BSON\Match;
 use App\BSON\CardStore;
@@ -19,7 +20,7 @@ class PaymentGateway extends AbstractGateway
      */
     public function getConnection($master = false)
     {
-      $config = $this->config['mongodb'];
+      $config = $this->config['paymentMongoDB'];
       try {
         $client = new \MongoDB\Client(
             $config['uri'],
@@ -37,7 +38,7 @@ class PaymentGateway extends AbstractGateway
     /**
      * @return \MongoDB\Database
      */
-    protected function getDb()
+    public function getDb()
     {
     	$conn = $this->getConnection();
     	if($conn) {
@@ -47,7 +48,7 @@ class PaymentGateway extends AbstractGateway
     	return $this->db;
     }
 
-    protected function setDb($dbname)
+    public function setDb($dbname)
     {
         $conn = $this->getConnection();
         if($conn) {
@@ -129,6 +130,39 @@ class PaymentGateway extends AbstractGateway
     		    // + balance
                 $this->getServiceManager()->get('PassportService')
                     ->addGold($data['user']['id'], ['gold' => (int)$data['gold'], 'point' => (int)$data['point']]);
+
+                // log
+                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+                $user = $trans->getUser();
+                $ulog = $logCollection->findOne(['_id' => $user['id']]);
+                if($ulog) {
+                    $ts = new \MongoDB\BSON\UTCDateTime($msec);
+                    $dataLogUpdate = [
+                        'update_date' => $ts
+                    ];
+                    if($collectionName == Card::CASHOUT_COLLECTION_NAME) {
+                        if ($ulog->getCashoutFirstPay() == null) {
+                            $dataLogUpdate['cashout_first_pay'] = $ts;
+                        }
+                        $dataLogUpdate['cashout_last_pay'] = $ts;
+                    }else {
+                        if ($ulog->getFirstPay() == null) {
+                            $dataLogUpdate['first_pay'] = $ts;
+                        }
+                        $dataLogUpdate['last_pay'] = $ts;
+                    }
+
+                    $logCollection->findOneAndUpdate(
+                        ['_id' => $user['id']],
+                        [
+                            '$set' => $dataLogUpdate
+                        ],
+                        [
+                            'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                        ]
+                    );
+                }
+
     			return ['code' => 1, 'result' => (array)$trans];
 	    	}
     	}catch(\Exception $e) {
@@ -284,6 +318,33 @@ class PaymentGateway extends AbstractGateway
     			// + balance here
                 $this->getServiceManager()->get('PassportService')
                      ->addGold($data['user']['id'], ['gold' => (int)$data['gold']]);
+
+                $msec = floor(microtime(true) * 1000);
+                // log
+                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+                $ulog = $logCollection->findOne(['_id' => $data['user']['id']]);
+                if($ulog) {
+                    $ts = new \MongoDB\BSON\UTCDateTime($msec);
+                    $dataLogUpdate = [
+                        'update_date' => $ts
+                    ];
+
+                    if ($ulog->getSmsFirstPay() == null) {
+                        $dataLogUpdate['sms_first_pay'] = $ts;
+                    }
+                    $dataLogUpdate['sms_last_pay'] = $ts;
+
+                    $logCollection->findOneAndUpdate(
+                        ['_id' =>$data['user']['id']],
+                        [
+                            '$set' => $dataLogUpdate
+                        ],
+                        [
+                            'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                        ]
+                    );
+                }
+
                 return ['code' => 1, 'msg' => 'Ban da nap thanh cong ' . $data['amount'],
                         'transaction_id' => $res->getInsertedId()
                     ];

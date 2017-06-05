@@ -1,6 +1,7 @@
 <?php
 namespace App\Mapper\MongoDb;
 
+use App\BSON\UserLog;
 use MongoDB\Operation\FindOne;
 use App\BSON\User;
 use App\BSON\UserGameAuth;
@@ -210,7 +211,20 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             if ($user->getPassword() !== md5($data['password'])) {
             	return ['code' => -3003, 'msg' => 'password_not_match'];
             }
-
+            // log
+            $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+            $logCollection->findOneAndUpdate(
+                ['_id' => $user->getId()],
+                [
+                    '$set' => [
+                        'last_login' => new \MongoDB\BSON\UTCDateTime($msec),
+                        'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
+                    ]
+                ],
+                [
+                    'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                ]
+            );
             return $this->generateJWT($user);
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -329,6 +343,14 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $result = $this->getCollection()->insertOne($user);
             if ($result->getInsertedId()) {
                 $user->setId($result->getInsertedId());
+
+                // log
+                $uLog = new UserLog();
+                $uLog->setId($user->getId());
+                $uLog->setFirstLogin();
+                $uLog->setLastLogin();
+                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+                $logCollection->insertOne($uLog);
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -368,6 +390,21 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ['returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER]
             );
             if ($u) {
+                // log
+                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+                $logCollection->findOneAndUpdate(
+                    ['_id' => $u->getId()],
+                    [
+                        '$set' => [
+                            'last_login' => new \MongoDB\BSON\UTCDateTime($msec),
+                            'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
+                        ]
+                    ],
+                    [
+                        'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                    ]
+                );
+
             	return $this->generateJWT($u);
             }
         } catch (\Exception $e) {
@@ -403,6 +440,15 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $result = $this->getCollection()->insertOne($user);
             if ($result->getInsertedId()) {
                 $user->setId($result->getInsertedId());
+
+                // log
+                $uLog = new UserLog();
+                $uLog->setId($user->getId());
+                $uLog->setFirstLogin();
+                $uLog->setLastLogin();
+                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+                $logCollection->insertOne($uLog);
+
                 return $this->generateJWT($user);
             }
         } catch (\Exception $e) {
@@ -1195,7 +1241,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
 
         $conditions = [
-            '_id' => new \MongoDB\BSON\ObjectID($uid),
+            '_id' => $uid, //new \MongoDB\BSON\ObjectID($uid),
         ];
 
         $msec = floor(microtime(true) * 1000);

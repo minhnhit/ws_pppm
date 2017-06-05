@@ -80,6 +80,7 @@ class ConfigProvider
                 Action\ConfigAction::class => Action\ConfigActionFactory::class,
                 Action\SwaggerAction::class => Action\SwaggerFactory::class,
                 Action\ToolAction::class => Action\ToolFactory::class,
+                Action\MigrateAction::class => Action\MigrateFactory::class,
                 Middleware\ApiMiddleware::class => Middleware\ApiMiddlewareFactory::class,
                 Middleware\AuthenticationMiddleware::class => Middleware\AuthenticationMiddlewareFactory::class,
                 Action\LoginPageAction::class => Action\LoginPageFactory::class,

@@ -31,11 +31,7 @@ class Match implements \MongoDB\BSON\Persistable
 
     public function __construct($data = [])
     {
-        if(isset($data['id'])) {
-        	$this->id = $data['id'];
-        }else {
-        	$this->id = new \MongoDB\BSON\ObjectID;
-        }
+        $this->id = new \MongoDB\BSON\ObjectID;
 
         // Get current time in milliseconds since the epoch
         $msec = floor(microtime(true) * 1000);
@@ -47,6 +43,7 @@ class Match implements \MongoDB\BSON\Persistable
     {
         return [
             '_id'         => $this->id,
+            'match_id'    => $this->match_id,
             'winner'      => $this->winner,
             'loser'       => $this->loser,
             'gold'        => $this->gold,
@@ -60,6 +57,7 @@ class Match implements \MongoDB\BSON\Persistable
     public function bsonUnserialize(array $data)
     {
         $this->id = $data['_id'];
+        $this->match_id = $data['match_id'];
         $this->winner = (array)$data['winner'];
         $this->loser = (array)$data['loser'];
         $this->fee = $data['fee'];
