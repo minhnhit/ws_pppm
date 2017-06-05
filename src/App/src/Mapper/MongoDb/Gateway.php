@@ -1,6 +1,7 @@
 <?php
 namespace App\Mapper\MongoDb;
 
+use App\BSON\Card;
 use App\BSON\UserLog;
 use MongoDB\Operation\FindOne;
 use App\BSON\User;
@@ -1283,5 +1284,47 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
 
         return ['code' => -3002, 'msg' => 'user_not_found'];
+    }
+
+    public function log($uid, $data, $logType = null)
+    {
+        $msec = floor(microtime(true) * 1000);
+        $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+        $ulog = $logCollection->findOne(['_id' => $uid]);
+        if($ulog) {
+            $ts = new \MongoDB\BSON\UTCDateTime($msec);
+            $dataLogUpdate = [
+                'update_date' => $ts
+            ];
+
+            if($logType == 'sms') {
+                if ($ulog->getSmsFirstPay() == null) {
+                    $dataLogUpdate['sms_first_pay'] = $ts;
+                }
+                $dataLogUpdate['sms_last_pay'] = $ts;
+            }
+
+            if($logType == Card::CASHOUT_COLLECTION_NAME) {
+                if ($ulog->getCashoutFirstPay() == null) {
+                    $dataLogUpdate['cashout_first_pay'] = $ts;
+                }
+                $dataLogUpdate['cashout_last_pay'] = $ts;
+            }elseif($logType == Card::COLLECTION_NAME) {
+                if ($ulog->getFirstPay() == null) {
+                    $dataLogUpdate['first_pay'] = $ts;
+                }
+                $dataLogUpdate['last_pay'] = $ts;
+            }
+
+            $logCollection->findOneAndUpdate(
+                ['_id' =>$uid],
+                [
+                    '$set' => $dataLogUpdate
+                ],
+                [
+                    'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                ]
+            );
+        }
     }
 }

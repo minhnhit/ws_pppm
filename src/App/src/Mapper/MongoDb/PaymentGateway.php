@@ -127,41 +127,15 @@ class PaymentGateway extends AbstractGateway
     		);
     	
     		if($trans) {
-    		    // + balance
-                $this->getServiceManager()->get('PassportService')
-                    ->addGold($data['user']['id'], ['gold' => (int)$data['gold'], 'point' => (int)$data['point']]);
+    		    if($btype != 'silver') {
+                    // + balance
+                    $this->getServiceManager()->get('PassportService')
+                        ->addGold($data['user']['id'], ['gold' => (int)$data['gold'], 'point' => (int)$data['point']]);
+                }
 
                 // log
-                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
                 $user = $trans->getUser();
-                $ulog = $logCollection->findOne(['_id' => $user['id']]);
-                if($ulog) {
-                    $ts = new \MongoDB\BSON\UTCDateTime($msec);
-                    $dataLogUpdate = [
-                        'update_date' => $ts
-                    ];
-                    if($collectionName == Card::CASHOUT_COLLECTION_NAME) {
-                        if ($ulog->getCashoutFirstPay() == null) {
-                            $dataLogUpdate['cashout_first_pay'] = $ts;
-                        }
-                        $dataLogUpdate['cashout_last_pay'] = $ts;
-                    }else {
-                        if ($ulog->getFirstPay() == null) {
-                            $dataLogUpdate['first_pay'] = $ts;
-                        }
-                        $dataLogUpdate['last_pay'] = $ts;
-                    }
-
-                    $logCollection->findOneAndUpdate(
-                        ['_id' => $user['id']],
-                        [
-                            '$set' => $dataLogUpdate
-                        ],
-                        [
-                            'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
-                        ]
-                    );
-                }
+                $this->getServiceManager()->get('PassportService')->log($user['id'], $data, $collectionName);
 
     			return ['code' => 1, 'result' => (array)$trans];
 	    	}
@@ -315,35 +289,14 @@ class PaymentGateway extends AbstractGateway
     		$col = $this->getDb()->selectCollection(Sms::COLLECTION_NAME);
     		$res = $col->insertOne($sms);
     		if($res) {
+    		    /*
     			// + balance here
                 $this->getServiceManager()->get('PassportService')
                      ->addGold($data['user']['id'], ['gold' => (int)$data['gold']]);
+                */
 
-                $msec = floor(microtime(true) * 1000);
                 // log
-                $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
-                $ulog = $logCollection->findOne(['_id' => $data['user']['id']]);
-                if($ulog) {
-                    $ts = new \MongoDB\BSON\UTCDateTime($msec);
-                    $dataLogUpdate = [
-                        'update_date' => $ts
-                    ];
-
-                    if ($ulog->getSmsFirstPay() == null) {
-                        $dataLogUpdate['sms_first_pay'] = $ts;
-                    }
-                    $dataLogUpdate['sms_last_pay'] = $ts;
-
-                    $logCollection->findOneAndUpdate(
-                        ['_id' =>$data['user']['id']],
-                        [
-                            '$set' => $dataLogUpdate
-                        ],
-                        [
-                            'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
-                        ]
-                    );
-                }
+                $this->getServiceManager()->get('PassportService')->log($data['user']['id'], $data, 'sms');
 
                 return ['code' => 1, 'msg' => 'Ban da nap thanh cong ' . $data['amount'],
                         'transaction_id' => $res->getInsertedId()
