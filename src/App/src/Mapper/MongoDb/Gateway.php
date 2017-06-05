@@ -394,11 +394,21 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ],
                 ['returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER]
             );
+
             if ($u) {
+                if(is_object($u)) {
+                    $user = (array)$u;
+                }
+
+                if (is_array($u)) {
+                    $user = new User();
+                    $user->bsonUnserialize($u);
+                }
+
                 // log
                 $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
                 $logCollection->findOneAndUpdate(
-                    ['_id' => $u['_id']],
+                    ['_id' => $user->getId()],
                     [
                         '$set' => [
                             'last_login' => new \MongoDB\BSON\UTCDateTime($msec),
@@ -410,7 +420,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     ]
                 );
 
-            	return $this->generateJWT($u);
+            	return $this->generateJWT($user);
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
