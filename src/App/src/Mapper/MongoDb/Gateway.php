@@ -398,7 +398,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 // log
                 $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
                 $logCollection->findOneAndUpdate(
-                    ['_id' => $u->getId()],
+                    ['_id' => $u['_id']],
                     [
                         '$set' => [
                             'last_login' => new \MongoDB\BSON\UTCDateTime($msec),
@@ -569,12 +569,6 @@ class Gateway extends AbstractGateway implements UserProviderInterface
      */
     public function updatePassword($data)
     {
-        if(!isset($data['username']) || !isset($data['oldPassword']) ||
-            !isset($data['newPassword'])
-        ) {
-            return ['code' => -1222];
-        }
-
         $currentUser = $this->findByUsername($data['username']);
         if (md5($data['oldPassword']) != $currentUser->getPassword()) {
             return ['code' => -3003, 'msg' => _t("old_password_not_match")];
@@ -595,6 +589,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     ]
                 ],
                 [
+                    //'projection' => [ 'id' => 1, 'username' => 1 ],
                    'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
                 ]
             );
@@ -603,7 +598,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     $currentUser->setStatus(1);
                 }
                 $currentUser->setPassword(md5($data['password']));
-                return ['code' => 1, 'result' => $user->getUserBasicInfo() ,'msg' => _t("change_password_success")];
+                return ['code' => 1, 'result' => $currentUser->getUserBasicInfo() ,'msg' => _t("change_password_success")];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -647,7 +642,9 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 // send mail
                 $this->getServiceManager()->get('mailService')->sendEmail($data['email'], $currentUser->getUsername(), $verification_code);
 
-                return ['code' => 1, 'msg' => _t("change_email_success")];
+                return ['code' => 1, 'result' => $currentUser->getUserBasicInfo(), 'msg' => _t("change_email_success")];
+            }else {
+                return ['code' => -3002];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -1028,7 +1025,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     ]
                 ],
                 [
-                            // 							'projection' => [ 'address' => 1 ],
+//                    'projection' => [ 'email' => 1 ],
                     'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
                 ]
             );
@@ -1046,7 +1043,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     //send email
                     $this->getServiceManager()->get('mailService')->sendEmail($email, $username, $code);
                 }
-                return ['code' => 1, 'email' => $email, 'code' => $code];
+                return ['code' => 1, 'result' => ['email' => $email, 'code' => $code]];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
@@ -1076,7 +1073,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ]
             );
             if ($user->getMatchedCount() > 0 && $user->getModifiedCount() > 0) {
-                return ['code' => 1];
+                return ['code' => 1, 'result' => ['username' => $data['username']]];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
