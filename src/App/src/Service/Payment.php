@@ -108,6 +108,7 @@ class Payment extends AbstractService
                 if ($bill['result'] === 1) {
                     $msg = _t("charge_success") . $payTransaction['amount'] . ' VND. ';
                     $return = ['code' => 1, 'result' => [
+                            'username' => $params['username'],
                             'transactionId' => $transaction['transaction_id'],
                             'amount' => $payTransaction['amount'], 'gold' => $params['gold'], 'msg' => $msg
                         ]
@@ -588,6 +589,12 @@ class Payment extends AbstractService
         }
         $user = $this->passportService->getProfileByUsername($params['username']);
         $balance = $user->getBalance();
+        if(strtolower($params['client_id']) == 'b1') {
+            return ['code' => 1, 'result' => [
+                'silver_balance' => $balance['silver'],
+                'gold_balance' => $balance['gold']
+            ]];
+        }
         return ['code' => 1, 'result' => ['balance' => $balance]];
     }
 

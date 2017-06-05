@@ -31,6 +31,5 @@ call_user_func(function () {
     require 'config/pipeline.php';
     require 'config/routes.php';
 
-    \LosMiddleware\LosLog\StaticLogger::save(json_encode($_REQUEST));
     $app->run();
 });

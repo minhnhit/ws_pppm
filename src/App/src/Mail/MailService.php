@@ -76,7 +76,7 @@ class MailService
             try {
             	return $transport->send($message);
             }catch(\Exception $e) {
-            	var_dump($e->getMessage());die;
+                \LosMiddleware\LosLog\StaticLogger::save($e->getMessage());
             }
         }
     }

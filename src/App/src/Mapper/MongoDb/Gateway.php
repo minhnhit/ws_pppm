@@ -195,6 +195,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ]
             );
 
+            if(!$user) {
+                return ['code' => -3002, 'msg' => 'user_not_found'];
+            }
+
             if(is_object($user)) {
                 $user = (array)$user;
             }
@@ -599,7 +603,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     $currentUser->setStatus(1);
                 }
                 $currentUser->setPassword(md5($data['password']));
-                return ['code' => 1, 'msg' => _t("change_password_success")];
+                return ['code' => 1, 'result' => $user->getUserBasicInfo() ,'msg' => _t("change_password_success")];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
