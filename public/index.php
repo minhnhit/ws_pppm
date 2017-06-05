@@ -20,6 +20,9 @@ call_user_func(function () {
     /** @var \Interop\Container\ContainerInterface $container */
     $container = require 'config/container.php';
 
+    /** Logger */
+    \LosMiddleware\LosLog\ExceptionLogger::registerHandlers('exception.log');
+
     /** @var \Zend\Expressive\Application $app */
     $app = $container->get(\Zend\Expressive\Application::class);
 
@@ -28,5 +31,6 @@ call_user_func(function () {
     require 'config/pipeline.php';
     require 'config/routes.php';
 
+    \LosMiddleware\LosLog\StaticLogger::save(json_encode($_REQUEST));
     $app->run();
 });
