@@ -1310,45 +1310,73 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         return ['code' => -3002, 'msg' => 'user_not_found'];
     }
 
+    /**
+     * TODO:
+     * @param $uid
+     * @param $data
+     * @param null $logType
+     */
     public function log($uid, $data, $logType = null)
     {
         $msec = floor(microtime(true) * 1000);
-        $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
-        $ulog = $logCollection->findOne(['_id' => $uid]);
-
         $ts = new \MongoDB\BSON\UTCDateTime($msec);
-        $dataLogUpdate = [
-            'update_date' => $ts
-        ];
 
-        if($logType == 'sms') {
-            if ($ulog && $ulog->getSmsFirstPay() == null) {
-                $dataLogUpdate['sms_first_pay'] = $ts;
+        try {
+            $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
+            $ulog = $logCollection->findOne(['_id' => $uid]);
+
+            $userLog = new UserLog();
+            if ($ulog) {
+                $dataLogUpdate = [
+                    'update_date' => $ts
+                ];
+                $userLog->bsonUnserialize($ulog);
+                if ($logType == 'sms') {
+                    if ($userLog->getSmsFirstPay() == null) {
+                        $dataLogUpdate['sms_first_pay'] = $ts;
+                    }
+                    $dataLogUpdate['sms_last_pay'] = $ts;
+                }
+                if ($logType == Card::CASHOUT_COLLECTION_NAME) {
+                    if ($userLog->getCashoutFirstPay() == null) {
+                        $dataLogUpdate['cashout_first_pay'] = $ts;
+                    }
+                    $dataLogUpdate['cashout_last_pay'] = $ts;
+                }
+                if ($logType == Card::COLLECTION_NAME) {
+                    if ($userLog->getFirstPay() == null) {
+                        $dataLogUpdate['first_pay'] = $ts;
+                    }
+                    $dataLogUpdate['last_pay'] = $ts;
+                }
+
+                $logCollection->findOneAndUpdate(
+                    ['_id' => $uid],
+                    [
+                        '$set' => $dataLogUpdate
+                    ],
+                    [
+                        'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                    ]
+                );
+            } else {
+                $userLog->setId($uid);
+                if ($logType == 'sms') {
+                    $userLog->setSmsFirstPay($ts);
+                    $userLog->setSmsLastPay($ts);
+                }
+
+                if ($logType == Card::CASHOUT_COLLECTION_NAME) {
+                    $userLog->setCashoutFirstPay($ts);
+                    $userLog->setCashoutLastPay($ts);
+                } elseif ($logType == Card::COLLECTION_NAME) {
+                    $userLog->setFirstPay($ts);
+                    $userLog->setLastPay($ts);
+                }
+                $logCollection->insertOne($userLog);
             }
-            $dataLogUpdate['sms_last_pay'] = $ts;
+        }catch(\Exception $e) {
+
         }
-
-        if($logType == Card::CASHOUT_COLLECTION_NAME) {
-            if ($ulog && $ulog->getCashoutFirstPay() == null) {
-                $dataLogUpdate['cashout_first_pay'] = $ts;
-            }
-            $dataLogUpdate['cashout_last_pay'] = $ts;
-        }elseif($logType == Card::COLLECTION_NAME) {
-            if ($ulog && $ulog->getFirstPay() == null) {
-                $dataLogUpdate['first_pay'] = $ts;
-            }
-            $dataLogUpdate['last_pay'] = $ts;
-        }
-
-        $logCollection->findOneAndUpdate(
-            ['_id' =>$uid],
-            [
-                '$set' => $dataLogUpdate
-            ],
-            [
-                'upsert' => true,
-                'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
-            ]
-        );
     }
 }

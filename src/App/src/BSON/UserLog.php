@@ -56,16 +56,20 @@ class UserLog implements \MongoDB\BSON\Persistable
     {
         $this->id = $data['_id'];
 
-        if (is_int($data['create_date'])) {
-            $this->create_date = $data['create_date'];
-        } else {
-            $this->create_date = intval($data['create_date']->__toString()/1000);
+        if(isset($data['create_date'])) {
+            if (is_int($data['create_date'])) {
+                $this->create_date = $data['create_date'];
+            } else {
+                $this->create_date = intval($data['create_date']->__toString() / 1000);
+            }
         }
 
-        if (is_int($data['update_date'])) {
-            $this->update_date = $data['update_date'];
-        } else {
-            $this->update_date = intval($data['update_date']->__toString()/1000);
+        if(isset($data['update_date'])) {
+            if (is_int($data['update_date'])) {
+                $this->update_date = $data['update_date'];
+            } else {
+                $this->update_date = intval($data['update_date']->__toString() / 1000);
+            }
         }
 
         if(isset($data['last_login'])) {
@@ -76,7 +80,7 @@ class UserLog implements \MongoDB\BSON\Persistable
             }
         }
 
-        if($data['first_login']) {
+        if(isset($data['first_login'])) {
             if (is_int($data['first_login'])) {
                 $this->first_login = $data['first_login'];
             } else {

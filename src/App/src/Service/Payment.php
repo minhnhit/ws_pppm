@@ -135,6 +135,7 @@ class Payment extends AbstractService
                 if ($errCode === -9998 && isset($paygate) && isset($paygate[1])) { // switch second paygate
                     return $this->charge($params, $paygate[1]);
                 }
+                if($errCode == -9998) $errCode = -9999;
             }
         } elseif ($errCode == -2) {
             $errCode = -9999;
