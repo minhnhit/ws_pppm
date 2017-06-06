@@ -1062,7 +1062,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 $email = $u->getEmail();
                 if ($email) {
                     //send email
-                    $this->getServiceManager()->get('mailService')->sendEmail($email, $params['username'], $code);
+                    $this->getServiceManager()->get('mailService')->sendEmail($email, $params['username'], $code, 'forgot-password-email');
                 }
                 return ['code' => 1, 'result' => ['email' => $email, 'code' => $code]];
             }
@@ -1346,6 +1346,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                     '$set' => $dataLogUpdate
                 ],
                 [
+                    'upsert' => true,
                     'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
                 ]
             );

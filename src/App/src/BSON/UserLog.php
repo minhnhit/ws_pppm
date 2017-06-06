@@ -68,10 +68,12 @@ class UserLog implements \MongoDB\BSON\Persistable
             $this->update_date = intval($data['update_date']->__toString()/1000);
         }
 
-        if (is_int($data['last_login'])) {
-            $this->last_login = $data['last_login'];
-        } else {
-            $this->last_login = intval($data['last_login']->__toString()/1000);
+        if(isset($data['last_login'])) {
+            if (is_int($data['last_login'])) {
+                $this->last_login = $data['last_login'];
+            } else {
+                $this->last_login = intval($data['last_login']->__toString() / 1000);
+            }
         }
 
         if($data['first_login']) {
@@ -182,14 +184,11 @@ class UserLog implements \MongoDB\BSON\Persistable
      */
     public function setFirstLogin($is_int = false)
     {
-        $this->first_login = $is_int;
-        /*
         $msec = floor(microtime(true) * 1000);
         $this->first_login = new \MongoDB\BSON\UTCDateTime($msec);
         if ($is_int) {
             $this->first_login = intval($this->first_login->__toString()/1000);
         }
-        */
     }
 
     /**
@@ -205,14 +204,11 @@ class UserLog implements \MongoDB\BSON\Persistable
      */
     public function setLastLogin($is_int = false)
     {
-        $this->last_login = $is_int;
-        /*
         $msec = floor(microtime(true) * 1000);
         $this->last_login = new \MongoDB\BSON\UTCDateTime($msec);
         if ($is_int) {
             $this->last_login = intval($this->last_login->__toString()/1000);
         }
-        */
     }
 
     /**
