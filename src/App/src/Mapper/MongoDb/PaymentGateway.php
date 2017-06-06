@@ -373,11 +373,13 @@ class PaymentGateway extends AbstractGateway
                 $loserBalance = $this->getServiceManager()->get('PassportService')
                     ->addGold($data['loser']['id'], ['gold' => (int)-$gold]);
 
-	    	    return ['code' => 1, 'winner_username' => $data['winner']['username'],
+	    	    return ['code' => 1, 'result' => [
+                        'winner_username' => $data['winner']['username'],
                         'loser_username' => $data['loser']['username'],
                         'winner_balance' => $winnerBalance,
                         'loser_balance' => $loserBalance
-                    ];
+                    ]
+                ];
             }
     	}catch(\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
