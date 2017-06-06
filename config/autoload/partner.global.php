@@ -40,6 +40,7 @@ return [
         'c1' => [
             'rateBuyCard' => '0.23',
             'rateMatch' => '0.1',
+            'rateGold' => 1,
             'password' => 'test',
             '_GAME_URL' => 'http://123.30.173.34:8080/IPN2',
             'secret_key' => 'exdEbh8ps5FmoHeyBRUay7UvHhfdd'
