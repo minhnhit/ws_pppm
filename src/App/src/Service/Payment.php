@@ -100,7 +100,7 @@ class Payment extends AbstractService
             $params['provider']['status'] = $payTransaction['providerStatus'];
             $params['provider']['transaction_id'] = $payTransaction['providerTransactionId'];
             if ((int)$errCode === 1) {
-                $params = array_merge($params, $payTransaction['result']);
+                $params = array_merge($params, $payTransaction);
                 $params['gold'] = (int)$payTransaction['amount'] * $rateGold;
                 $point = (int)(intval($payTransaction['amount']) * $ratePoint);
                 $params['point'] = $point;
