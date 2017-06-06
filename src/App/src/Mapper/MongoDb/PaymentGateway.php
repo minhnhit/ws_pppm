@@ -134,7 +134,7 @@ class PaymentGateway extends AbstractGateway
                 }
 
                 // log
-                $this->getServiceManager()->get('PassportService')->log($data['user']['id'], $data, $collectionName);
+                $this->getServiceManager()->get('PassportService')->getMapper()->log($data['user']['id'], $data, $collectionName);
 
     			return ['code' => 1, 'result' => [
     			    'transactionId' => $data['transactionId'],
