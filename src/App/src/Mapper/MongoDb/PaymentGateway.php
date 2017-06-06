@@ -136,7 +136,10 @@ class PaymentGateway extends AbstractGateway
                 // log
                 $this->getServiceManager()->get('PassportService')->log($data['user']['id'], $data, $collectionName);
 
-    			return ['code' => 1, 'result' => (array)$trans];
+    			return ['code' => 1, 'result' => [
+    			    'transactionId' => $data['transactionId'],
+                    'amount' => $data['amount'], 'gold' => $data['gold']
+                ]];
 	    	}
     	}catch(\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
