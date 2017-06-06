@@ -105,7 +105,7 @@ class Payment extends AbstractService
                 $point = (int)(intval($payTransaction['amount']) * $ratePoint);
                 $params['point'] = $point;
                 $bill = $this->mapper->updateTransaction($params);
-                if ($bill['result'] === 1) {
+                if ($bill['code'] == 1) {
                     $msg = _t("charge_success") . $payTransaction['amount'] . ' VND. ';
                     $return = ['code' => 1, 'result' => [
                             'username' => $params['username'],
