@@ -432,6 +432,7 @@ class User implements \MongoDB\BSON\Persistable
      */
     public function setLastLogin($is_int = false)
     {
+        //$this->first_login = new \MongoDB\BSON\UTCDateTime($is_int);
         $msec = floor(microtime(true) * 1000);
         $this->last_login = new \MongoDB\BSON\UTCDateTime($msec);
         if ($is_int) {
@@ -461,7 +462,6 @@ class User implements \MongoDB\BSON\Persistable
         if ($is_int) {
             $this->create_date = intval($this->create_date->__toString()/1000);
         }
-
     }
 
     /**
@@ -484,7 +484,6 @@ class User implements \MongoDB\BSON\Persistable
         if ($is_int) {
             $this->update_date = intval($this->update_date->__toString()/1000);
         }
-
     }
 
     public function getSource()
@@ -540,4 +539,5 @@ class User implements \MongoDB\BSON\Persistable
             'source' => $this->source
         ];
     }
+
 }
