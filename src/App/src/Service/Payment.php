@@ -100,8 +100,8 @@ class Payment extends AbstractService
             $params['provider']['status'] = $payTransaction['providerStatus'];
             $params['provider']['transaction_id'] = $payTransaction['providerTransactionId'];
             if ((int)$errCode === 1) {
-                if(isset($this->config['partner'][$params['client_id']]["rateGold"])) {
-                    $rateGold = $this->config['partner'][$params['client_id']]["rateGold"];
+                if(isset($this->config['partner'][$params['client_id']]["cashoutRateGold"])) {
+                    $rateGold = $this->config['partner'][$params['client_id']]["cashoutRateGold"];
                 }
                 $params = array_merge($params, $payTransaction);
                 $params['gold'] = (int)$payTransaction['amount'] * $rateGold;

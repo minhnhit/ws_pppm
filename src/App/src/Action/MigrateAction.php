@@ -32,8 +32,9 @@ class MigrateAction implements ServerMiddlewareInterface
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
 //        $this->migrateUser();//done
-        $this->migrateUserGold();
-//        $this->migrateCard(Card::CASHOUT_COLLECTION_NAME);//done
+        $this->migrateUserLog();//done
+//        $this->migrateUserGold();//done
+//        $this->migrateCard(/*Card::CASHOUT_COLLECTION_NAME*/);//done
 //        $this->migrateCardStore();//done
 //        $this->migrateCardBuy();//done
 //        $this->migrateMatch();//done
@@ -56,17 +57,20 @@ class MigrateAction implements ServerMiddlewareInterface
             ]
         ]);
         */
-        $page = 47;//47
+        $page = 1;//47
         $range = 5000;
         $offset = ($page - 1) * $range;
         $sql = "
-            SELECT id,username,password,fullname,birthday,sex,address,city,pp.status,pp.create_date,pp.update_date,source, agent_id,email,oauth_id,channel_id FROM passport AS pp
+            SELECT id,username,password,fullname,birthday,sex,address,city,pp.status,pp.create_date,pp.update_date,source, agent_id,email,oauth_id,channel_id,first_login,last_login FROM passport AS pp
             LEFT JOIN passport_source AS ps
             ON pp.id = ps.passport_id
             LEFT JOIN passport_email AS pe
             ON pp.id = pe.passport_id
             LEFT JOIN passport_channeling AS pc
             ON pp.id = pc.passport_id
+            LEFT JOIN ssg_login AS sl 
+            ON pp.id = sl.passport_id
+            WHERE pp.update_date >= '2017-06-06 00:00:00'
             ORDER BY id ASC
             OFFSET  $offset ROWS 
             FETCH NEXT $range ROWS ONLY 
@@ -76,6 +80,8 @@ class MigrateAction implements ServerMiddlewareInterface
         foreach($results as $row) {
             $createDate = strtotime($row['create_date']) * 1000;
             $updateDate = strtotime($row['update_date']) * 1000;
+            $firstLogin = strtotime($row['first_login']) * 1000;
+            $lastLogin = strtotime($row['last_login']) * 1000;
             $user = new User();
             $user->setId($row['id']);
             $user->setUsername($row['username']);
@@ -93,13 +99,15 @@ class MigrateAction implements ServerMiddlewareInterface
                 $oauth[$row['channel_id']] = [$channel[1]];
                 $user->setOauth($oauth);
             }
+            $user->setFirstLogin($firstLogin);
+            $user->setLastLogin($lastLogin);
             $user->setCreateDate($createDate);
             $user->setUpdateDate($updateDate);
             try {
                 $result = $this->mongoPassportDb->getMapper()->getCollection()->insertOne($user);
                 //var_dump($result);
             } catch (\Exception $e) {
-                var_dump($e->getMessage());
+//                var_dump($e->getMessage());
                 //return ['code' => -9999, 'msg' => _t('system_error')];
             }
 //            var_dump($user);die;
@@ -109,11 +117,12 @@ class MigrateAction implements ServerMiddlewareInterface
 
     private function migrateUserGold()
     {
-        $page = 15;
+        $page = 1;
         $range = 5000;
         $offset = ($page - 1) * $range;
         $sql = "
             SELECT * FROM gold AS cc 
+            WHERE update_date >= '2017-06-06 00:00:00'
             ORDER BY passport_id ASC
             OFFSET  $offset ROWS 
             FETCH NEXT $range ROWS ONLY 
@@ -139,7 +148,7 @@ class MigrateAction implements ServerMiddlewareInterface
                 //$result = $this->mongoPassportDb->getMapper()->addGold((int)$row['passport_id'], ['gold' => (int)$row['gold']]);
                 //var_dump($result);
             } catch (\Exception $e) {
-                var_dump($e->getMessage());
+                //var_dump($e->getMessage());
                 //return ['code' => -9999, 'msg' => _t('system_error')];
             }
 //            var_dump($user);die;
@@ -158,6 +167,7 @@ class MigrateAction implements ServerMiddlewareInterface
         $total = $rets['total'];
         $sql = "
             SELECT * FROM ".$collectionName." AS cc 
+            WHERE update_date >= '2017-06-06 00:00:00'
             ORDER BY id ASC
             OFFSET  $offset ROWS 
             FETCH NEXT $range ROWS ONLY 
@@ -192,7 +202,7 @@ class MigrateAction implements ServerMiddlewareInterface
                 $col = $this->mongoPayDb->getMapper()->getDb()->selectCollection($collectionName);
                 $result = $col->insertOne($card);
             } catch (\Exception $e) {
-                var_dump($e->getMessage());die;
+                //var_dump($e->getMessage());die;
             }
         }
         die("done");
@@ -295,7 +305,7 @@ class MigrateAction implements ServerMiddlewareInterface
 
     private function migrateMatch()
     {
-        $page = 10;
+        $page = 10;//10
         $range = 5000;
         $offset = ($page - 1) * $range;
 
@@ -338,7 +348,7 @@ class MigrateAction implements ServerMiddlewareInterface
 
     private function migratePromotion()
     {
-        $page = 75;
+        $page = 76;//75
         $range = 1000;
         $offset = ($page - 1) * $range;
 
@@ -380,7 +390,7 @@ class MigrateAction implements ServerMiddlewareInterface
 
     private function migrateSms()
     {
-        $page = 2;
+        $page = 2;//2
         $range = 5000;
         $offset = ($page - 1) * $range;
 
@@ -432,23 +442,56 @@ class MigrateAction implements ServerMiddlewareInterface
         $page = 1;
         $range = 5000;
         $offset = ($page - 1) * $range;
+        /*
         $sql = "
             SELECT * FROM ssg_login AS cc 
             ORDER BY passport_id ASC
             OFFSET  $offset ROWS 
             FETCH NEXT $range ROWS ONLY 
         ";
-        $results = $this->passportSqlDb->query($sql)->execute();
+        */
+        $sql = "
+            SELECT *
+            FROM card_pay
+            ORDER BY passport_id ASC
+            OFFSET  $offset ROWS 
+            FETCH NEXT $range ROWS ONLY 
+        ";
+        $results = $this->paySqlDb->query($sql)->execute();
         $ret = [];
         foreach($results as $row) {
             try {
-                $firstLogin = new \MongoDB\BSON\UTCDateTime(strtotime($row['first_login']) * 1000);
-                $lastLogin = new \MongoDB\BSON\UTCDateTime(strtotime($row['last_login']) * 1000);
-                $uLog = new UserLog();
-                $uLog->setId((int)$row['passport_id']);
-                $uLog->setFirstLogin($firstLogin);
-                $uLog->setLastLogin($lastLogin);
-                //var_dump($result);
+                $firstPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['first_pay']) * 1000);
+                $lastPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['last_pay']) * 1000);
+                $col = $this->mongoPassportDb->getMapper()->getDb()->selectCollection(strtolower('c1_' . UserLog::COLLECTION_NAME));
+                $col->findOneAndUpdate(
+                    ['_id' => (int)$row['passport_id']],
+                    [
+                        '$set' => [
+                            'first_pay' => $firstPay,
+                            'last_pay' => $lastPay
+                        ]
+                    ],
+                    [
+                        'upsert' => true,
+                        'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                    ]
+                );
+//                $firstPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['first_pay']) * 1000);
+//                $lastPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['last_pay']) * 1000);
+//                $cashoutfirstPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['cashout_first_pay']) * 1000);
+//                $cashoutlastPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['cashout_last_pay']) * 1000);
+//                $smsfirstPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['first_pay']) * 1000);
+//                $smslastPay = new \MongoDB\BSON\UTCDateTime(strtotime($row['last_pay']) * 1000);
+//                $uLog = new UserLog();
+//                $uLog->setId((int)$row['passport_id']);
+//                $uLog->setFirstPay($firstPay);
+//                $uLog->setLastPay($lastPay);
+//                $uLog->setCashoutFirstPay($cashoutfirstPay);
+//                $uLog->setCashoutLastPay($cashoutlastPay);
+//                $uLog->setSmsFirstPay($smsfirstPay);
+//                $uLog->setSmsLastPay($smslastPay);
+//                $col->insertOne($uLog);
             } catch (\Exception $e) {
                 var_dump($e->getMessage());
                 //return ['code' => -9999, 'msg' => _t('system_error')];
