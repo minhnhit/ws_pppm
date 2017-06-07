@@ -1097,6 +1097,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             );
             if ($user->getMatchedCount() > 0 && $user->getModifiedCount() > 0) {
                 return ['code' => 1, 'result' => ['username' => $data['username']]];
+            }else {
+                return ['code' => -3006];
             }
         } catch (\Exception $e) {
             $subject = "System Error: MongoDB Exception";
