@@ -27,6 +27,7 @@ Error Code
 |-3003   | Password not matched |
 |-3004   | Email exist |
 |-3005   | Oauth ID exists |
+|-3006   | Invalid Verification Code |
 |
 |-4002   | Card:out-of-stock |
 |-4003   | Card not exit or Used |
