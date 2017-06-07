@@ -1083,6 +1083,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
      */
     public function resetPassword($data)
     {
+        $u = $this->findByUsername($data['username']);
+        if(!$u) {
+            return ['code' => -3002];
+        }
         $msec = floor(microtime(true) * 1000);
         try {
             $user = $this->getCollection()->updateOne(
