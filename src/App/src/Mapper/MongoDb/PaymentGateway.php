@@ -379,8 +379,8 @@ class PaymentGateway extends AbstractGateway
 	    	    return ['code' => 1, 'result' => [
                         'winner_username' => $data['winner']['username'],
                         'loser_username' => $data['loser']['username'],
-                        'winner_balance' => $winnerBalance['gold'],
-                        'loser_balance' => $loserBalance['gold']
+                        'winner_balance' => $winnerBalance['balance']['gold'],
+                        'loser_balance' => $loserBalance['balance']['gold']
                     ]
                 ];
             }
