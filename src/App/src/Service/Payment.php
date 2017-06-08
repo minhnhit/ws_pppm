@@ -361,7 +361,7 @@ class Payment extends AbstractService
                 }
 
                 $appId = null;
-                if(strpos(strtolower($arParams['mo_message'], 'cuv')) !== false) {
+                if(strtolower($arParams['command_code']) == 'cuv') {
                     $appId = 'c1';
                 }
                 $mo = explode(" ", $arParams['mo_message']);
