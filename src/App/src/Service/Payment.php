@@ -360,6 +360,10 @@ class Payment extends AbstractService
                     return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
                 }
 
+                $appId = null;
+                if(strpos(strtolower($arParams['mo_message'], 'cuv')) !== false) {
+                    $appId = 'c1';
+                }
                 $mo = explode(" ", $arParams['mo_message']);
                 end($mo);
                 $username = strtolower($mo[key($mo)]);
@@ -391,7 +395,7 @@ class Payment extends AbstractService
   			'providerName' => $provider	,
   			'providerMessage' => $arParams['error_message'],
   			'providerStatus' => 1,
-  			'appId' => null
+  			'appId' => $appId
   		];
 
         $userInfo = $this->passportService->getProfileByUsername($username);

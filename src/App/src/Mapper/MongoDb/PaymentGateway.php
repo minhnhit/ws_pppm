@@ -303,7 +303,7 @@ class PaymentGateway extends AbstractGateway
                 $this->getServiceManager()->get('PassportService')->getMapper()->log($data['user']['id'], $data, 'sms');
 
                 return ['code' => 1, 'msg' => 'Ban da nap thanh cong ' . $data['amount'],
-                        'transaction_id' => $res->getInsertedId()
+                        'transaction_id' => $res->getInsertedId()->__toString()
                     ];
     		}
     	}catch(\Exception $e) {
