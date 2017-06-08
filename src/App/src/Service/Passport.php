@@ -86,6 +86,9 @@ class Passport extends AbstractService
             return ['code' => $errCode];
         }
         $result = $this->mapper->forgotPassword($params);
+        if($params['client_id'] == 'b1') {
+            if($result['code'] == -3002) $result['code'] = -2013;
+        }
         return $result;
     }
 
@@ -96,6 +99,10 @@ class Passport extends AbstractService
             return ['code' => $errCode];
         }
         $result = $this->mapper->resetPassword($params);
+        if($params['client_id'] == 'b1') {
+            if($result['code'] == -3002) $result['code'] = -2013;
+            if($result['code'] == -3006) $result['code'] = -2012;
+        }
         return $result;
     }
 
@@ -107,6 +114,10 @@ class Passport extends AbstractService
             return ['code' => $errCode];
         }
         $result = $this->mapper->updatePassword($params);
+        if($params['client_id'] == 'b1') {
+            if($result['code'] == -3002) $result['code'] = -2013;
+            if($result['code'] == -3003) $result['code'] = -2007;
+        }
         return $result;
     }
 
