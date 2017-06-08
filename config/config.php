@@ -6,8 +6,12 @@ use Zend\ConfigAggregator\PhpFileProvider;
 
 // To enable or disable caching, set the `ConfigAggregator::ENABLE_CACHE` boolean in
 // `config/autoload/local.php`.
+$cacheFileName = 'config-cache.php';
+if(getenv('CODENAME')) {
+    $cacheFileName = 'config-'.getenv('CODENAME').'-cache.php';
+}
 $cacheConfig = [
-    'config_cache_path' => 'data/config-cache.php',
+    'config_cache_path' => 'data/'.$cacheFileName,
 ];
 
 $aggregator = new ConfigAggregator([
