@@ -139,6 +139,11 @@ Before contributing read [the contributing guide](CONTRIBUTING.md).
 
 root/MovrvoGCaXUsqbuyDvlB
 user_exec/sBmWtZWURSkUCAzkPwrx
+
+-----
+grep -rnw 'module/' -e 'smsRate'
+-------
+http://api.coupviet.net/sms/1pay?access_key=c4gbr23cbvh824l66w03&command=kh&mo_message=KH anhtest2&msisdn=84982644220&request_id=8x98|523424|84982644220&request_time=2016-01-30T09:28:35Z&short_code=8298&signature=72a70708d294f9462127ba9fc4244ffe93c223da235335e86b3a2aa297955000
 ____________
 PC-Company Pubkey
 

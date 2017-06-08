@@ -47,4 +47,10 @@ return [
             'secret_key' => 'exdEbh8ps5FmoHeyBRUay7UvHhfdd'
         ],
 	],
+    'smsRate' => [
+        9029 => [
+            'rateGold' => '0.01',
+            'ratePoint' => '0.001'
+        ]
+    ],
 ];
