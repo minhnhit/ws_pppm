@@ -36,6 +36,9 @@ class Passport extends AbstractService
     	}
     	$params['username'] = strtolower($params['username']);
     	$result = $this->mapper->insertUser($params);
+        if($params['client_id'] == 'b1') {
+            if($result['code'] == -3000) $result['code'] = -2010;
+        }
     	return $result;
     }
     
