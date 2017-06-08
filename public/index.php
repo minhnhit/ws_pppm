@@ -33,7 +33,8 @@ call_user_func(function () {
 
     $codename = getenv('CODENAME');
     if($codename == 'B1') {
-        putenv('MONGO_DB_PAYMENT_SOURCE', 'b1_payment');
+        if(!defined('MONGO_DB_PAYMENT_SOURCE'))
+            define('MONGO_DB_PAYMENT_SOURCE', 'b1_payment');
     }
     $app->run();
 });
