@@ -31,7 +31,7 @@ class Passport extends AbstractService
     	if ($errCode !== 1) {
     		return ['code' => $errCode];
     	}
-    	
+    	$params['username'] = strtolower($params['username']);
     	$result = $this->mapper->insertUser($params);
     	return $result;
     }
