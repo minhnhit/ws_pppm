@@ -22,7 +22,7 @@ class Passport extends AbstractService
     		return ['code' => $errCode];
     	}
     	$result = $this->mapper->login($params);
-    	if($params['client_id'] == 'b1') {
+        if(strtolower($params['client_id']) == 'b1') {
     	    if($result['code'] == -3002) $result['code'] = -2013;
             if($result['code'] == -3003) $result['code'] = -2007;
         }
@@ -37,7 +37,7 @@ class Passport extends AbstractService
     	}
     	$params['username'] = strtolower($params['username']);
     	$result = $this->mapper->insertUser($params);
-        if($params['client_id'] == 'b1') {
+        if(strtolower($params['client_id']) == 'b1') {
             if($result['code'] == -3000) $result['code'] = -2010;
         }
     	return $result;
@@ -99,7 +99,7 @@ class Passport extends AbstractService
             return ['code' => $errCode];
         }
         $result = $this->mapper->resetPassword($params);
-        if($params['client_id'] == 'b1') {
+        if(strtolower($params['client_id']) == 'b1') {
             if($result['code'] == -3002) $result['code'] = -2013;
             if($result['code'] == -3006) $result['code'] = -2012;
         }
@@ -114,7 +114,7 @@ class Passport extends AbstractService
             return ['code' => $errCode];
         }
         $result = $this->mapper->updatePassword($params);
-        if($params['client_id'] == 'b1') {
+        if(strtolower($params['client_id']) == 'b1') {
             if($result['code'] == -3002) $result['code'] = -2013;
             if($result['code'] == -3003) $result['code'] = -2007;
         }
