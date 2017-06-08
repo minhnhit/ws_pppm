@@ -57,7 +57,7 @@ return [
             'username' => env('MONGO_DB_USERNAME', null),
             'password' => env('MONGO_DB_PASSWORD', null),
             'ssl' => env('MONGO_DB_SSL', false),
-            'authSource' => defined('MONGO_DB_PAYMENT_SOURCE') ?MONGO_DB_PAYMENT_SOURCE : env('MONGO_DB_PAYMENT_SOURCE', 'payment'),
+            'authSource' => defined('MONGO_DB_PAYMENT_SOURCE') ? MONGO_DB_PAYMENT_SOURCE : env('MONGO_DB_PAYMENT_SOURCE', 'payment'),
             'replicaSet' => env('MONGO_DB_REPLICASET', null)
         ],
         'driver_options' => [
