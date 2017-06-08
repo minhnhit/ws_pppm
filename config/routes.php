@@ -46,4 +46,4 @@ $app->get('/authorize', \OAuth2Server\Action\AuthorizeAction::class, 'authorize'
 $app->post('/access_token', \OAuth2Server\Action\AccessTokenAction::class, 'accessToken');
 
 // Migrate Data
-$app->get('/migrate', App\Action\MigrateAction::class, 'migration.data');
+//$app->get('/migrate', App\Action\MigrateAction::class, 'migration.data');

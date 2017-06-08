@@ -11,7 +11,7 @@ chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 
 $codename = getenv('CODENAME');
-if($codename == 'B1') {
+if(strtoupper($codename) == 'B1') {
     defined('MONGO_DB_PAYMENT_SOURCE') || define('MONGO_DB_PAYMENT_SOURCE', 'b1_payment');
 }
 

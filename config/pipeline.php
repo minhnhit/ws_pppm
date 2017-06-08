@@ -50,6 +50,7 @@ $app->pipe(UrlHelperMiddleware::class);
 if(!isset($container->get('config')['debug']) || !$container->get('config')['debug']) {
     $app->pipe(new \Slim\Middleware\HttpBasicAuthentication([
         "secure" => false,
+        "path" => ["/docs", "/tool", "/generate"],
         "users" => [
             "root" => "t00r",
             "user" => "passw0rd"
