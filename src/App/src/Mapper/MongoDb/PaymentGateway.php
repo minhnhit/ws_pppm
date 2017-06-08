@@ -44,7 +44,6 @@ class PaymentGateway extends AbstractGateway
     	if($conn) {
             $config = $this->config['paymentMongoDB'];
             $dbname = defined('MONGO_DB_PAYMENT_SOURCE')? MONGO_DB_PAYMENT_SOURCE : $config['uri_options']['authSource'];
-            var_dump($dbname);die;
     		$this->db = $conn->selectDatabase($dbname);
     	}
 
