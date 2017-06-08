@@ -111,6 +111,10 @@ class ApiAction implements MiddlewareInterface
     	}else {
     		$result = ['code' => -9999];
     	}
+
+    	if(isset($result['msg'])) {
+    	    unset($result['msg']);
+        }
     	
     	return new JsonResponse($result);
     }
