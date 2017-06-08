@@ -35,6 +35,9 @@ class Payment extends AbstractService
 
         $userInfo = $this->passportService->getProfileByUsername($params['username']);
         if(!$userInfo) {
+            if(strtolower($params['client_id']) == 'b1') {
+                return ['code' => -2013];
+            }
             return ['code' => -3002];
         }
 
