@@ -427,7 +427,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
 
-        $username = isset($data['username'])?: time();
+        $username = isset($data['username'])? strtolower($data['username']): time();
         if(!isset($data['username'])) {
             $username = time();
         }

@@ -14,6 +14,9 @@ class Passport extends AbstractService
 	
     public function login($params)
     {
+        if(isset($params['username'])) {
+            $params['username'] = strtolower($params['username']);
+        }
     	$errCode = $this->validateParams($params, ['username', 'password']);
     	if ($errCode !== 1) {
     		return ['code' => $errCode];
