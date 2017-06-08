@@ -181,7 +181,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $user = $this->getCollection()->findOneAndUpdate(
                 [
                 	'username' => $data['username'],
-                	'password' => md5($data['password'])
+                	//'password' => md5($data['password'])
                 ],
                 [
                 	'$set' => [
