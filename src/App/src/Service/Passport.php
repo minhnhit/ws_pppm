@@ -23,7 +23,8 @@ class Passport extends AbstractService
     	}
     	$result = $this->mapper->login($params);
     	if($params['client_id'] == 'b1') {
-    	    if($result['code'] == -3000) $result['code'] = -2010;
+    	    if($result['code'] == -3002) $result['code'] = -2013;
+            if($result['code'] == -3003) $result['code'] = -2007;
         }
     	return $result;
     }
