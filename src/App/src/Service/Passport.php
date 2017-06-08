@@ -22,6 +22,9 @@ class Passport extends AbstractService
     		return ['code' => $errCode];
     	}
     	$result = $this->mapper->login($params);
+    	if($params['client_id'] == 'b1') {
+    	    if($result['code'] == -3000) $result['code'] = -2010;
+        }
     	return $result;
     }
     
