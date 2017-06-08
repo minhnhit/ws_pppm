@@ -31,5 +31,9 @@ call_user_func(function () {
     require 'config/pipeline.php';
     require 'config/routes.php';
 
+    $codename = getenv('CODENAME');
+    if($codename == 'B1') {
+        putenv('MONGO_DB_PAYMENT_SOURCE', 'b1_payment');
+    }
     $app->run();
 });
