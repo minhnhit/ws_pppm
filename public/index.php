@@ -10,6 +10,11 @@ if (php_sapi_name() === 'cli-server'
 chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 
+$codename = getenv('CODENAME');
+if($codename == 'B1') {
+    defined('MONGO_DB_PAYMENT_SOURCE') || define('MONGO_DB_PAYMENT_SOURCE', 'b1_payment');
+}
+
 /**
  * Self-called anonymous function that creates its own scope and keep the global namespace clean.
  */
@@ -31,10 +36,5 @@ call_user_func(function () {
     require 'config/pipeline.php';
     require 'config/routes.php';
 
-    $codename = getenv('CODENAME');
-    if($codename == 'B1') {
-        if(!defined('MONGO_DB_PAYMENT_SOURCE'))
-            define('MONGO_DB_PAYMENT_SOURCE', 'b1_payment');
-    }
     $app->run();
 });
