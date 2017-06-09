@@ -359,7 +359,7 @@ class Payment extends AbstractService
                     . $arParams['command_code'] . "&error_code=" . $arParams['error_code'] . "&error_message="
                     . $arParams['error_message'] . "&mo_message=" . $arParams['mo_message'] . "&msisdn="
                     . $arParams['msisdn'] . "&request_id=" . $arParams['request_id'] . "&request_time=" . $arParams['request_time'];
-                
+
                 $signature = hash_hmac("sha256", $dataSign, $secret);
                 if ($signature != $arParams['signature']) {
                     return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
@@ -443,6 +443,13 @@ class Payment extends AbstractService
   		    $result['status'] = 0;
         }
         $result['type'] = 'text';
+  		if(isset($result['code'])) {
+  		    unset($result['code']);
+        }
+        if(isset($result["transaction_id"])) {
+            unset($result["transaction_id"]);
+        }
+
         return $result;
   	}
 
