@@ -354,10 +354,12 @@ class Payment extends AbstractService
                     return ['status' => 1, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
                 }
 
+                //access_key=$access_key&amount=$amount&command_code=$command_code&error_code=$error_code&error_message=$error_message&mo_message=$mo_message&msisdn=$msisdn&request_id=$request_id&request_time=$request_time
                 $dataSign = "access_key=" . $arParams['access_key'] . "&amount=" . $arParams['amount'] . "&command_code="
-                    . $arParams['command_code'] . "&error_access_keycode=" . $arParams['error_code'] . "&error_message="
+                    . $arParams['command_code'] . "&error_code=" . $arParams['error_code'] . "&error_message="
                     . $arParams['error_message'] . "&mo_message=" . $arParams['mo_message'] . "&msisdn="
                     . $arParams['msisdn'] . "&request_id=" . $arParams['request_id'] . "&request_time=" . $arParams['request_time'];
+                
                 $signature = hash_hmac("sha256", $dataSign, $secret);
                 if ($signature != $arParams['signature']) {
                     return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
