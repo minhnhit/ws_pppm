@@ -143,7 +143,9 @@ user_exec/sBmWtZWURSkUCAzkPwrx
 -----
 grep -rnw 'module/' -e 'smsRate'
 -------
-http://api.coupviet.net/sms/1pay?access_key=c4gbr23cbvh824l66w03&command=kh&mo_message=KH anhtest2&msisdn=84982644220&request_id=8x98|523424|84982644220&request_time=2016-01-30T09:28:35Z&short_code=8298&signature=72a70708d294f9462127ba9fc4244ffe93c223da235335e86b3a2aa297955000
+http://api.coupviet.net/sms/1pay?access_key=ftql5xqutfgazxjjrrq6&command=CUV&amount=10000&mo_message=CUV NAP10 meomeo&msisdn=84916441090&request_id=mw_9029|b46a996c802d43e39c1799816087e389|84916441090&request_time=2017-06-09T10:12:58Z&error_code=WCG-0000&error_message=Giao dich thuc hien thanh cong&signature=22255162686ac892b4bd2fda89d3edccc855fbf9456bc6bdd48ad483428db873
+
+ {"access_key":"ftql5xqutfgazxjjrrq6","amount":"10000","command_code":"CUV","error_code":"WCG-0000","error_message":"Giao dich thuc hien thanh cong","mo_message":"CUV NAP10 meomeo","msisdn":"84916441090","request_id":"mw_9029|b46a996c802d43e39c1799816087e389|84916441090","request_time":"2017-06-09T10:12:58Z","signature":"22255162686ac892b4bd2fda89d3edccc855fbf9456bc6bdd48ad483428db873"}
 ____________
 PC-Company Pubkey
 

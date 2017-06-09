@@ -437,6 +437,8 @@ class Payment extends AbstractService
                     $this->serviceManager->get('mailService')->sendAlertEmail($subject, $e);
                 }
             }
+        }else {
+  		    $result['status'] = 0;
         }
         $result['type'] = 'text';
         return $result;
