@@ -421,7 +421,7 @@ class Payment extends AbstractService
             if($data['appId']) {
                 $partnerConfig = $this->config['partner'][strtolower($data['appId'])];
                 $gParams = [
-                    'appId' => strtoupper($data['appId']),
+                    'appId' => ($data['appId'] == 'c1')? 'M01' : strtoupper($data['appId']),
                     'transaction_id' => $result['transaction_id'],
                     'username' => $username,
                     'amount' => $data['amount'],
