@@ -302,7 +302,7 @@ class PaymentGateway extends AbstractGateway
                 // log
                 $this->getServiceManager()->get('PassportService')->getMapper()->log($data['user']['id'], $data, 'sms');
 
-                return ['code' => 1, 'msg' => 'Ban da nap thanh cong ' . $data['amount'],
+                return ['code' => 1, 'sms' => 'Ban da nap thanh cong ' . $data['amount'],
                         'transaction_id' => $res->getInsertedId()->__toString()
                     ];
     		}
@@ -310,7 +310,7 @@ class PaymentGateway extends AbstractGateway
     		$subject = "System Error: MongoDB Exception";
     		$this->getMailService()->sendAlertEmail($subject, $e);
     	}
-    	return ['code' => -1, 'msg' => 'Giao dich khong thanh cong. Vui long thu lai!'];
+    	return ['code' => -1, 'sms' => 'Giao dich khong thanh cong. Vui long thu lai!'];
     }
 
     /**
