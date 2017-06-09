@@ -71,6 +71,7 @@ class SmsAction implements ServerMiddlewareInterface
         $routeMatchParams = $this->router->match($request)->getMatchedParams();
         $provider = $routeMatchParams['provider'];
         $result = $this->paymentService->chargeSMS($data, $provider);
+		$result['sms'] .= " Lien he <a href='https://www.facebook.com/coupviet'>https://www.facebook.com/coupviet</a> de biet them chi tiet";
         return new JsonResponse($result);
     }
 }
