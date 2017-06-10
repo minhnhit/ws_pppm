@@ -349,9 +349,9 @@ class Payment extends AbstractService
                         . $arParams['msisdn'] . "&telco=" . $arParams['telco'];
                     $signature = hash_hmac("sha256", $dataSign, $secret);
                     if ($signature != $arParams['signature']) {
-                        return ['status' => 0, 'sms' => '', 'type' => 'text'];
+                        return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
                     }
-                    return ['status' => 1, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
+                    return ['status' => 1, 'sms' => 'Chu ky hop le!', 'type' => 'text'];
                 }
 
                 //access_key=$access_key&amount=$amount&command_code=$command_code&error_code=$error_code&error_message=$error_message&mo_message=$mo_message&msisdn=$msisdn&request_id=$request_id&request_time=$request_time
