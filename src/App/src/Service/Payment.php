@@ -346,7 +346,7 @@ class Payment extends AbstractService
                     //access_key=$access_key&amount=$amount&command_code=$command_code&mo_message=$mo_message&msisdn=$msisdn&telco=$telco
                     $dataSign = "access_key=" . $arParams['access_key'] . "&amount=" . $arParams['amount'] . "&command_code="
                         . $arParams['command_code'] . "&mo_message=" . $arParams['mo_message'] . "&msisdn="
-                        . $arParams['msisdn'] . "&telco=" . $arParams['telco'];
+                        . $arParams['msisdn'] . "&telco=" . $params['telco'];
                     $signature = hash_hmac("sha256", $dataSign, $secret);
                     if ($signature != $arParams['signature']) {
                         return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
