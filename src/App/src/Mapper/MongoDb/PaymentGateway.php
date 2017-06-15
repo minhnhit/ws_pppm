@@ -283,7 +283,7 @@ class PaymentGateway extends AbstractGateway
     	$sms->setUser($data['user']);
     	$sms->setShortCode($data['shortCode']);
     	$sms->setCommand($data['command']);
-    	$sms->setAmount($data['amount']);
+    	$sms->setAmount((int)$data['amount']);
     	$sms->setGold($data['gold']);
     	$sms->setPhoneNumber($data['phoneNumber']);
     	$sms->setProvider($data['provider']);
