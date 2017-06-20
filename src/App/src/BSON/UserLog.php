@@ -7,6 +7,10 @@ class UserLog implements \MongoDB\BSON\Persistable
 
     private $id;//user_id
 
+    private $source;
+
+    private $agent_id;
+
     private $first_login;
 
     private $last_login;
@@ -39,6 +43,8 @@ class UserLog implements \MongoDB\BSON\Persistable
     {
         return [
             '_id'         => $this->id,
+            'source'    => $this->source,
+            'agent_id'  => $this->agent_id,
             'create_date' => $this->create_date,
             'update_date' => $this->update_date,
             'first_login' => $this->first_login,
@@ -55,6 +61,8 @@ class UserLog implements \MongoDB\BSON\Persistable
     public function bsonUnserialize(array $data)
     {
         $this->id = $data['_id'];
+        $this->source = isset($data['source']) ? $data['source'] : null;
+        $this->agent_id = isset($data['agent_id']) ? $data['agent_id'] : null;
 
         if(isset($data['create_date'])) {
             if (is_int($data['create_date'])) {
@@ -266,6 +274,16 @@ class UserLog implements \MongoDB\BSON\Persistable
     public function setSource($source)
     {
         $this->source = $source;
+    }
+
+    public function getAgentId()
+    {
+        return $this->agent_id;
+    }
+
+    public function setAgentId($agent)
+    {
+        $this->agent_id = $agent;
     }
 
     public function getStatus()

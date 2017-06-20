@@ -331,10 +331,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         $user->setUsername(strtolower($data['username']));
         $user->setPassword(md5($data['password']));
         $source = isset($data['source'])? : null;
+        $agent = isset($data['agent'])? : null;
         $user->setSource($source);
-        if (isset($data['agent'])) {
-            $user->setAgent($data['agent']);
-        }
+        $user->setAgent($agent);
+
         if(isset($data['email'])) {
             $user->setEmail($data['email']);
         }
@@ -352,6 +352,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 // log
                 $uLog = new UserLog();
                 $uLog->setId($user->getId());
+                $uLog->setSource($source);
+                $uLog->setAgentId($agent);
                 $uLog->setFirstLogin();
                 $uLog->setLastLogin();
                 $logCollection = $this->getDb()->selectCollection(strtolower($data['client_id']) . '_' . UserLog::COLLECTION_NAME);
