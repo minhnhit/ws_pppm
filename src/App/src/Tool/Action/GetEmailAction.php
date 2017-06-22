@@ -13,7 +13,7 @@ class GetEmailAction extends AbstractAction
      *     description="Generate Get Email data",
      *     operationId="__invoke",
      *     produces={"application/json"},
-     *     tags={"Passport Generation Data"},
+     *     tags={"PassportLog Generation Data"},
      *     @SWG\Parameter(
      *         name="client_id",
      *         in="formData",

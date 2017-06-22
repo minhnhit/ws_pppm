@@ -13,7 +13,8 @@ class Card implements \MongoDB\BSON\Persistable
     private $user = [
         'id' => null,
         'username' => null,
-        'source' => null
+        'source' => null,
+        'agent_id' => null
     ];
 
     private $card_pin;
