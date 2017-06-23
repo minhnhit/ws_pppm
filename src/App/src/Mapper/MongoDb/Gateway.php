@@ -330,8 +330,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         $user = new User(['id' => $this->getNextSequence('passport_id')]);
         $user->setUsername(strtolower($data['username']));
         $user->setPassword(md5($data['password']));
-        $source = isset($data['source'])? : null;
-        $agent = isset($data['agent'])? : null;
+        $source = isset($data['source'])? $data['source'] : null;
+        $agent = isset($data['agent'])? $data['agent'] : null;
         $user->setSource($source);
         $user->setAgent($agent);
 
