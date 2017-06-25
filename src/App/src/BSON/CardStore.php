@@ -19,7 +19,9 @@ class CardStore implements \MongoDB\BSON\Persistable
 
     private $user = [
         'id' => null,
-        'username' => null
+        'username' => null,
+        'source' => null,
+        'agent_id' => null
     ];
 
     private $gold; // buy card (card_value * rate)
