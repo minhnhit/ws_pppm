@@ -28,6 +28,7 @@ Error Code
 |-3004   | Email exist |
 |-3005   | Oauth ID exists |
 |-3006   | Invalid Verification Code |
+|-3007   | OTP has expired |
 |
 |-4002   | Card:out-of-stock |
 |-4003   | Card not exit or Used |

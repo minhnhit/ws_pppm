@@ -594,4 +594,95 @@ abstract class AbstractService
     
     	return 1;
     }
+
+    public function parseSMSRequest($params, $provider, $smsType = 'smsplus')
+    {
+        $data = [];
+        $config = $this->config;
+        if($provider == '1pay') {
+            $secret = $config['partner'][$provider][$smsType]['secret'];
+            //"access_key":"c4gbr23cbvh824l66w03","command":"kh","mo_message":"KH nguyenanbadaogmailcom","msisdn":"84902639325","request_id":"8x98|523424|84902639325","request_time":"2016-01-30T09:28:35Z","short_code":"8298","signature":"72a70708d294f9462127ba9fc4244ffe93c223da235335e86b3a2aa297955000"
+            // SMSPlus
+            if($smsType == 'smsplus') {
+                $arParams['access_key'] = isset($params['access_key']) ? $params['access_key'] : 'no_access_key';
+                $arParams['command_code'] = isset($params['command_code']) ? $params['command_code'] : 'no_command';
+                $arParams['mo_message'] = isset($params['mo_message']) ? $params['mo_message'] : 'no_mo_message';
+                $arParams['msisdn'] = isset($params['msisdn']) ? $params['msisdn'] : 'no_msisdn';
+                $arParams['request_id'] = isset($params['request_id']) ? $params['request_id'] : 'no_request_id';
+                $arParams['request_time'] = isset($params['request_time']) ? $params['request_time'] : 'no_request_time';
+                $arParams['amount'] = isset($params['amount']) ? $params['amount'] : 0;
+                $arParams['signature'] = isset($params['signature']) ? $params['signature'] : 'no_signature';
+                $arParams['error_code'] = isset($params['error_code']) ? $params['error_code'] : 'no_error_code';
+                $arParams['error_message'] = isset($params['error_message']) ? $params['error_message'] : 'no_error_message';
+
+                if (isset($params['telco']) && $params['telco'] == 'vtm') {
+                    //access_key=$access_key&amount=$amount&command_code=$command_code&mo_message=$mo_message&msisdn=$msisdn&telco=$telco
+                    $dataSign = "access_key=" . $arParams['access_key'] . "&amount=" . $arParams['amount'] . "&command_code="
+                        . $arParams['command_code'] . "&mo_message=" . $arParams['mo_message'] . "&msisdn="
+                        . $arParams['msisdn'] . "&telco=" . $params['telco'];
+                    $signature = hash_hmac("sha256", $dataSign, $secret);
+                    if ($signature != $arParams['signature']) {
+                        return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
+                    }
+                    return ['status' => 1, 'sms' => 'Chu ky hop le!', 'type' => 'text'];
+                }
+
+                //access_key=$access_key&amount=$amount&command_code=$command_code&error_code=$error_code&error_message=$error_message&mo_message=$mo_message&msisdn=$msisdn&request_id=$request_id&request_time=$request_time
+                $dataSign = "access_key=" . $arParams['access_key'] . "&amount=" . $arParams['amount'] . "&command_code="
+                    . $arParams['command_code'] . "&error_code=" . $arParams['error_code'] . "&error_message="
+                    . $arParams['error_message'] . "&mo_message=" . $arParams['mo_message'] . "&msisdn="
+                    . $arParams['msisdn'] . "&request_id=" . $arParams['request_id'] . "&request_time=" . $arParams['request_time'];
+
+                $signature = hash_hmac("sha256", $dataSign, $secret);
+                if ($signature != $arParams['signature']) {
+                    return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
+                }
+
+                $appId = null;
+                if(strtolower($arParams['command_code']) == 'cuv') {
+                    $appId = 'c1';
+                }
+                $mo = explode(" ", $arParams['mo_message']);
+                end($mo);
+                $username = strtolower($mo[key($mo)]);
+                $phone = "0" . substr($arParams['msisdn'], 2);
+                $shortCode = 9029;
+                $data = ['username' => $username, 'phone' => $phone, 'shortCode' => $shortCode];
+            }else if($smsType == 'sms') {
+                $secret = $config['partner'][$provider][$smsType]['secret'];
+                //access_key=$access_key&command=$command&mo_message=$mo_message&msisdn=$msisdn&request_id=$request_id&request_time=$request_time&short_code=$short_code
+
+                $arParams['access_key'] = isset($params['access_key']) ? $params['access_key'] : 'no_access_key';
+                $arParams['command'] = isset($params['command']) ? $params['command'] : 'no_command';
+                $arParams['mo_message'] = isset($params['mo_message']) ? $params['mo_message'] : 'no_mo_message';
+                $arParams['msisdn'] = isset($params['msisdn']) ? $params['msisdn'] : 'no_msisdn';
+                $arParams['request_id'] = isset($params['request_id']) ? $params['request_id'] : 'no_request_id';
+                $arParams['request_time'] = isset($params['request_time']) ? $params['request_time'] : 'no_request_time';
+                $arParams['short_code'] = isset($params['short_code']) ? $params['short_code'] : 'no_short_code';
+                $arParams['signature'] = isset($params['signature']) ? $params['signature'] : 'no_signature';
+
+                $dataSign = "access_key=" . $arParams['access_key'] . "&command=" . $arParams['command'] . "&mo_message="
+                    . $arParams['mo_message'] . "&msisdn=" . $arParams['msisdn'] . "&request_id="
+                    . $arParams['request_id'] . "&request_time=" . $arParams['request_time'] . "&short_code="
+                    . $arParams['short_code'] ;
+                $signature = hash_hmac("sha256", $dataSign, $secret);
+
+                if ($signature != $arParams['signature']) {
+                    $result = ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
+                } else {
+                    $result = ['status' => 1];
+                    $phone = "0" . substr($arParams['msisdn'], 2);
+                    $data = ['phone' => $phone, 'shortCode' =>  $arParams['short_code']];
+                }
+            } else {
+                $result = ['status' => 0, 'sms' => 'Partner not found', 'type' => 'text'];
+            }
+        }else {
+            $result = ['status' => 0, 'sms' => 'Partner not found', 'type' => 'text'];
+        }
+
+        $result['data'] = $data;
+        $result['type'] = 'text';
+        return $result;
+    }
 }

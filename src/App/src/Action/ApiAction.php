@@ -36,7 +36,7 @@ class ApiAction implements MiddlewareInterface
      *         collectionFormat="csv",
      *         enum={"login","register","oauth","reset-pass","forgot-pass","change-pass","update-email", "get-email",
      *         "update-mobile", "charge", "exchange","get-balance","buy-card","update-match","promotion","recheck",
-     *         "update-username"
+     *         "update-username","get-otp","generate-otp","verify-otp"
      *     }
      *     ),
 	 *     @SWG\Parameter(

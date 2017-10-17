@@ -177,9 +177,69 @@ class Passport extends AbstractService
         return $this->mapper->getBalance($params);
     }
 
-    public function getSlotOtp($params, $provider)
+    public function generateOtp($params)
     {
-        $result = $this->mapper->getSlotOtp($params, $provider);
-        return $result;
+        $errCode = $this->validateParams($params, ['username']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+
+        $user = $this->mapper->findByUsername($params['username']);
+        if($user) {
+            $redis = $this->serviceManager->get('PredisCache');
+            $rkey = 'otp:'.$user['id'];
+            $code = strtoupper(substr(md5(microtime()), 0, 5));
+            $redis->setex($rkey, 300, $code);
+
+            return ['code' => 1, 'result' => ['otp' => $code]];
+        }
+
+        return ['code' => -3002];
+    }
+
+    public function verifyOtp($params)
+    {
+        $errCode = $this->validateParams($params, ['username', 'otp']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+
+        $user = $this->mapper->findByUsername($params['username']);
+        if($user) {
+            $redis = $this->serviceManager->get('PredisCache');
+            $rkey = 'otp:'.$user['id'];
+            $otp = $redis->get($rkey);
+            if($otp === $params['otp']) {
+                // your code here
+                return ['code' => 1, 'result' => null];
+            }
+            return ['code' => -3007, 'msg' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
+        }
+
+        return ['code' => -3002];
+    }
+
+    public function getOtp($params, $provider)
+    {
+        $res = $this->parseSMSRequest($params, $provider, 'sms');
+        if($res['status'] == 0) {
+            return $res;
+        }
+        $mobile = $res['data']['phone'];
+
+        $userInfo = $this->mapper->findByMobile($mobile);
+
+        if(!$userInfo) {
+            return ['status' => 0, 'msg' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!'];
+        }
+
+        $redis = $this->serviceManager->get('PredisCache');
+        $rkey = 'otp:'.$userInfo['id'];
+        $otp = $redis->get($rkey);
+
+        if(!$otp) {
+            return ['status' => 0, 'msg' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
+        }
+        return ['status' => 1, 'msg' => 'Ma xac thuc (OTP) la ' . $otp];
     }
 }
