@@ -21,6 +21,7 @@
         "erusev/parsedown-extra": "^0.7.1",
         "firebase/php-jwt": "^4.0",
         "gedmo/doctrine-extensions": "^2.4",
+        "http-interop/http-middleware": "^0.4.1",
         "jamesn/paymentapi": "dev-master",
         "league/oauth2-server": "^5.1",
         "mongodb/mongodb": "^1.1",
@@ -40,11 +41,11 @@
         "zendframework/zend-filter": "^2.7",
         "zendframework/zend-form": "^2.10",
         "zendframework/zend-http": "^2.6",
+        "zendframework/zend-log": "^2.9",
         "zendframework/zend-mail": "^2.7",
         "zendframework/zend-servicemanager": "^3.3",
         "zendframework/zend-stdlib": "^3.1",
         "zendframework/zend-view": "^2.9",
-        "zendframework/zend-log": "^2.9",
         "zircote/swagger-php": "^2.0"
     },
     "require-dev": {

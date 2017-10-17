@@ -56,10 +56,13 @@ class SmsAction implements ServerMiddlewareInterface
 
     private $paymentService;
 
-    public function __construct(Router\RouterInterface $router, $paymentService)
+    private $passportService;
+
+    public function __construct(Router\RouterInterface $router, $paymentService, $passportService)
     {
         $this->router   = $router;
         $this->paymentService = $paymentService;
+        $this->passportService = $passportService;
     }
 
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
@@ -70,7 +73,13 @@ class SmsAction implements ServerMiddlewareInterface
 
         $routeMatchParams = $this->router->match($request)->getMatchedParams();
         $provider = $routeMatchParams['provider'];
-        $result = $this->paymentService->chargeSMS($data, $provider);
+
+        if(isset($data['short_code']) && $data['short_code'] == 8198){
+            $result = $this->passportService->getSlotOtp($data, $provider);
+        } else {
+            $result = $this->paymentService->chargeSMS($data, $provider);
+        }
+
 		$result['sms'] .= " Lien he <a href='https://www.facebook.com/coupviet'>https://www.facebook.com/coupviet</a> de biet them chi tiet";
         return new JsonResponse($result);
     }

@@ -79,6 +79,11 @@ class Passport extends AbstractService
         return $this->mapper->findByUsername($username);
     }
 
+    public function getProfileByMobile($mobile)
+    {
+        return $this->mapper->findByMobile($mobile);
+    }
+
     public function forgotPass($params)
     {
         $errCode = $this->validateParams($params, ['username']);
@@ -170,5 +175,11 @@ class Passport extends AbstractService
             return ['code' => $errCode];
         }
         return $this->mapper->getBalance($params);
+    }
+
+    public function getSlotOtp($params, $provider)
+    {
+        $result = $this->mapper->getSlotOtp($params, $provider);
+        return $result;
     }
 }

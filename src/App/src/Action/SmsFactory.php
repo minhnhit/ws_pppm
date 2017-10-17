@@ -11,6 +11,7 @@ class SmsFactory
     {
         $router   = $container->get(RouterInterface::class);
         $paymentService = $container->get('PaymentService');
-        return new SmsAction($router, $paymentService);
+        $passportService = $container->get('PassportService');
+        return new SmsAction($router, $paymentService, $passportService);
     }
 }

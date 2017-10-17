@@ -9,6 +9,7 @@ use App\BSON\UserGameAuth;
 use App\Provider\UserProviderInterface;
 use App\Mapper\AbstractGateway;
 
+
 class Gateway extends AbstractGateway implements UserProviderInterface
 {
     private $db;
@@ -248,6 +249,27 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         $user = new User();
         try {
             $userInfo = $this->getCollection()->findOne(['username' => $username]);
+            if ($userInfo) {
+                $user->bsonUnserialize($userInfo);
+            }else {
+                return null;
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
+        return $user;
+    }
+
+    /**
+     * @param string $mobile
+     * @return User
+     */
+    public function findByMobile($mobile)
+    {
+        $user = new User();
+        try {
+            $userInfo = $this->getCollection()->findOne(['mobile' => $mobile]);
             if ($userInfo) {
                 $user->bsonUnserialize($userInfo);
             }else {
@@ -680,11 +702,13 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             return ['code' => -3002];
         }
 
+        $otp_code = mt_rand(100000, 999999);
         $verification_code = strtoupper(substr(md5(microtime()), 0, 5));
         $msec = floor(microtime(true) * 1000);
         $dataToUpdate = [
             'mobile' => $data['mobile'],
             'verification_code' => $verification_code,
+            'otp_code' => $otp_code,
             'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
         ];
 
@@ -1161,6 +1185,53 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
         return false;
+    }
+
+    public function getSlotOtp($params, $provider)
+    {
+        $config = $this->config;
+        if($provider == '1pay') {
+            $secret = $config['partner'][$provider]['sms']['secret'];
+            //access_key=$access_key&command=$command&mo_message=$mo_message&msisdn=$msisdn&request_id=$request_id&request_time=$request_time&short_code=$short_code
+
+            if (isset($params['command']) && $params['command'] == 'GGOTP') {
+
+                $arParams['access_key'] = isset($params['access_key']) ? $params['access_key'] : 'no_access_key';
+                $arParams['command'] = isset($params['command']) ? $params['command'] : 'no_command';
+                $arParams['mo_message'] = isset($params['mo_message']) ? $params['mo_message'] : 'no_mo_message';
+                $arParams['msisdn'] = isset($params['msisdn']) ? $params['msisdn'] : 'no_msisdn';
+                $arParams['request_id'] = isset($params['request_id']) ? $params['request_id'] : 'no_request_id';
+                $arParams['request_time'] = isset($params['request_time']) ? $params['request_time'] : 'no_request_time';
+                $arParams['short_code'] = isset($params['short_code']) ? $params['short_code'] : 'no_short_code';
+                $arParams['signature'] = isset($params['signature']) ? $params['signature'] : 'no_signature';
+
+                $dataSign = "access_key=" . $arParams['access_key'] . "&command=" . $arParams['command'] . "&mo_message="
+                    . $arParams['mo_message'] . "&msisdn=" . $arParams['msisdn'] . "&request_id="
+                    . $arParams['request_id'] . "&request_time=" . $arParams['request_time'] . "&short_code="
+                    . $arParams['short_code'] ;
+                $signature = hash_hmac("sha256", $dataSign, $secret);
+
+                if ($signature != $arParams['signature']) {
+                    return ['status' => 0, 'sms' => 'Chu ky khong hop le!', 'type' => 'text'];
+                }
+
+                $userMobile = "0" . substr($arParams['msisdn'], 2);
+                $userInfo = $this->passportService->getProfileByMobile($userMobile);
+
+                if(!$userInfo) {
+                    return ['status' => 0, 'msg' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!'];
+                }
+
+            } else {
+                return ['status' => 0, 'sms' => 'Partner not found', 'type' => 'text'];
+            }
+        } else {
+            return ['status' => 0, 'sms' => 'Partner not found', 'type' => 'text'];
+        }
+
+        $result['type'] = 'text';
+
+        return $result;
     }
 
     public function getUsernameFromLoginId($gameId, $qid)
