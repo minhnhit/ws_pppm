@@ -366,6 +366,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         $user->setFirstLogin();
         $user->setCreateDate();
         $user->setStatus(1);
+
         try {
             $result = $this->getCollection()->insertOne($user);
             if ($result->getInsertedId()) {
@@ -697,18 +698,18 @@ class Gateway extends AbstractGateway implements UserProviderInterface
 
     public function updateMobile($data)
     {
+        $user = $this->findByUsername($data['username']);
+        $data['passportId'] = $user->getId();
         $currentUser = $this->getById($data['passportId']);
         if(!$currentUser) {
             return ['code' => -3002];
         }
 
-        $otp_code = mt_rand(100000, 999999);
         $verification_code = strtoupper(substr(md5(microtime()), 0, 5));
         $msec = floor(microtime(true) * 1000);
         $dataToUpdate = [
             'mobile' => $data['mobile'],
             'verification_code' => $verification_code,
-            'otp_code' => $otp_code,
             'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
         ];
 
@@ -1136,6 +1137,30 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
 
         return ['code' => -3002];
+    }
+
+    public function forgotPasswordByOtp($data)
+    {
+        $msec = floor(microtime(true) * 1000);
+        try {
+            $user = $this->getCollection()->updateOne(
+                ['username' => $data['username']],
+                ['$set' =>
+                    [
+                        'password' => md5($data['password']),
+                        'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
+                    ]
+                ]
+            );
+            if ($user->getMatchedCount() > 0 && $user->getModifiedCount() > 0) {
+                return ['code' => 1, 'result' => ['username' => $data['username']]];
+            }else {
+                return ['code' => -3006];
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
     }
 
     public function getEmail($params)

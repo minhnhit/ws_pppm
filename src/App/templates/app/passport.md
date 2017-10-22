@@ -364,7 +364,7 @@ ___________________________________________________________
 ###### Parameters
 | Param         | Data Type  | Required | Value |
 | ------------- | ---------- | -------- | ----- |
-| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/** |
 | identityNumber| String     | true     |**/^[\s\S]$/**  |
 
 
@@ -386,3 +386,108 @@ __Output Data (JSON Data)__
 }
 ```
 ___________________________________________________________
+
+## XII. Generate Otp
+
+> URL: [https://{domain}/api/generate-otp](https://{domain}/api/update-identity-number)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+
+
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "test123",
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+ dataDecrypted = {
+    "code": "12F57"
+ }
+```
+___________________________________________________________
+
+
+## XII. Verify Otp
+
+> URL: [https://{domain}/api/verify-otp](https://{domain}/api/update-identity-number)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+| otp           | String     | true     |**/^[A-Z0-9]{5}$/**  | 
+
+
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "test123",
+    "otp" : "13F91"
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+{
+  "code" : "ErrorCode", 
+}
+```
+___________________________________________________________
+
+## XIII. Forgot Pass Via Otp
+
+> URL: [https://{domain}/api/forgot-pass-via-otp](https://{domain}/api/update-identity-number)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+| otp           | String     | true     |**/^[A-Z0-9]{5}$/**  | 
+|password       | String     | true     |**/[\s\S]{6,32}/** |
+
+
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "test123",
+    "otp" : "13F91"
+    "password": "newpass"
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+{
+  "code" : "ErrorCode", 
+}
+```

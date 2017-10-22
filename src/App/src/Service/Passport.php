@@ -84,6 +84,39 @@ class Passport extends AbstractService
         return $this->mapper->findByMobile($mobile);
     }
 
+    public function forgotPassViaOtp($params)
+    {
+        $errCode = $this->validateParams($params, ['username', 'password', 'otp']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+
+        $user = $this->mapper->findByUsername($params['username']);
+
+        if($user) {
+
+            $redis = $this->serviceManager->get('PredisCache');
+            $rkey = 'otp:'.$user->getId();
+            $otp = $redis->get($rkey);
+
+            if($otp === $params['otp']) {
+
+                $result = $this->mapper->forgotPasswordByOtp($params);
+
+                if(strtolower($params['client_id']) == 'b1') {
+                    if($result['code'] == -3002) $result['code'] = -2013;
+                    if($result['code'] == -3006) $result['code'] = -2012;
+                }
+
+                $redis->del($rkey);
+                return $result;
+            }
+            return ['code' => -3007, 'msg' => 'Ma xac thuc (OTP) khong chinh xac hoac da het han. Vui long thu lai!'];
+        }
+        return ['code' => -3002];
+    }
+
+
     public function forgotPass($params)
     {
         $errCode = $this->validateParams($params, ['username']);
@@ -187,7 +220,7 @@ class Passport extends AbstractService
         $user = $this->mapper->findByUsername($params['username']);
         if($user) {
             $redis = $this->serviceManager->get('PredisCache');
-            $rkey = 'otp:'.$user['id'];
+            $rkey = 'otp:'.$user->getId();
             $code = strtoupper(substr(md5(microtime()), 0, 5));
             $redis->setex($rkey, 300, $code);
 
@@ -207,10 +240,11 @@ class Passport extends AbstractService
         $user = $this->mapper->findByUsername($params['username']);
         if($user) {
             $redis = $this->serviceManager->get('PredisCache');
-            $rkey = 'otp:'.$user['id'];
+            $rkey = 'otp:'.$user->getId();
             $otp = $redis->get($rkey);
             if($otp === $params['otp']) {
-                // your code here
+
+                $redis->del($rkey);
                 return ['code' => 1, 'result' => null];
             }
             return ['code' => -3007, 'msg' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
@@ -230,16 +264,16 @@ class Passport extends AbstractService
         $userInfo = $this->mapper->findByMobile($mobile);
 
         if(!$userInfo) {
-            return ['status' => 0, 'msg' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!'];
+            return ['status' => 0, 'sms' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!'];
         }
 
         $redis = $this->serviceManager->get('PredisCache');
-        $rkey = 'otp:'.$userInfo['id'];
+        $rkey = 'otp:'.$userInfo->getId();
         $otp = $redis->get($rkey);
 
         if(!$otp) {
-            return ['status' => 0, 'msg' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
+            return ['status' => 0, 'sms' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
         }
-        return ['status' => 1, 'msg' => 'Ma xac thuc (OTP) la ' . $otp];
+        return ['status' => 1, 'sms' => 'Ma kich hoat OTP cua ban la ' . $otp . '. Ma OTP nay se het hieu luc sau 5 phut.'];
     }
 }

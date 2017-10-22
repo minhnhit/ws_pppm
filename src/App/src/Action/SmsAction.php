@@ -75,12 +75,12 @@ class SmsAction implements ServerMiddlewareInterface
         $provider = $routeMatchParams['provider'];
 
         if(isset($data['short_code']) && $data['short_code'] == 8198){
-            $result = $this->passportService->getSlotOtp($data, $provider);
+            $result = $this->passportService->getOtp($data, $provider);
         } else {
             $result = $this->paymentService->chargeSMS($data, $provider);
+            $result['sms'] .= " Lien he <a href='https://www.facebook.com/coupviet'>https://www.facebook.com/coupviet</a> de biet them chi tiet";
         }
 
-		$result['sms'] .= " Lien he <a href='https://www.facebook.com/coupviet'>https://www.facebook.com/coupviet</a> de biet them chi tiet";
         return new JsonResponse($result);
     }
 }
