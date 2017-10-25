@@ -4,8 +4,8 @@ return [
         '1pay' => [
             'type' => 'smsplus', //smsplus
             'sms' => [
-                'key' => 'z5iztpi3othz1rqqo87u',
-                'secret' => 'orx7wnkunfrqo2mr8xf1j8pt6yapxlmu'
+                'key' => 'otp34bmp13gd41ochin5',
+                'secret' => 'bvd656l19l01l037ob5ifgrvs9s86vis'
             ],
             'smsplus' => [
                 'key' => 'ftql5xqutfgazxjjrrq6',
