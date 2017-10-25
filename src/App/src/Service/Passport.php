@@ -264,7 +264,7 @@ class Passport extends AbstractService
         $userInfo = $this->mapper->findByMobile($mobile);
 
         if(!$userInfo) {
-            return ['status' => 0, 'sms' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!'];
+            return ['status' => 0, 'sms' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!', 'type' => $res['type']];
         }
 
         $redis = $this->serviceManager->get('PredisCache');
@@ -272,8 +272,8 @@ class Passport extends AbstractService
         $otp = $redis->get($rkey);
 
         if(!$otp) {
-            return ['status' => 0, 'sms' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
+            return ['status' => 0, 'sms' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!', 'type' => $res['type']];
         }
-        return ['status' => 1, 'sms' => 'Ma kich hoat OTP cua ban la ' . $otp . '. Ma OTP nay se het hieu luc sau 5 phut.'];
+        return ['status' => 1, 'sms' => 'Ma kich hoat OTP cua ban la ' . $otp . '. Ma OTP nay se het hieu luc sau 5 phut.', 'type' => $res['type']];
     }
 }
