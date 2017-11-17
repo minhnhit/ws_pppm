@@ -59,7 +59,7 @@ abstract class AbstractGateway
 		    $uid = $uid->__toString();
         }
 		$result = ["code" => 1, 'result' =>['token' => $token, 'uid' => $uid,
-				'username' => $user->getUsername(), 'mobile' => $user->getMobile()]];
+				'username' => $user->getUsername(), 'mobile' => $uMobile]];
 		return $result;
 	}
 }
