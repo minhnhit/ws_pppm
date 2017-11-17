@@ -45,8 +45,7 @@ abstract class AbstractGateway
 		$userInfo = [
 				'uid' => $user->getId(),
 				'identity' => $user->getUsername(),
-				'credential' => $user->getPassword(),
-                'mobile' => $user->getMobile()
+				'credential' => $user->getPassword()
 		];
 		$jwtConfig = getConfigToken();
 		$payload = $jwtConfig + $userInfo;
@@ -56,7 +55,7 @@ abstract class AbstractGateway
 		    $uid = $uid->__toString();
         }
 		$result = ["code" => 1, 'result' =>['token' => $token, 'uid' => $uid,
-				'username' => $user->getUsername()]];
+				'username' => $user->getUsername(), 'mobile' => $user->getMobile()]];
 		return $result;
 	}
 }

@@ -292,6 +292,11 @@ class Passport extends AbstractService
         $otp = $redis->get($rkey);
 
         if(!$otp) {
+
+            $rkey = 'otp:'.$userInfo->getId();
+            $code = strtoupper(substr(md5(microtime()), 0, 5));
+            $redis->setex($rkey, 300, $code);
+
             return ['status' => 0, 'sms' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!', 'type' => $res['type']];
         }
         return ['status' => 1, 'sms' => 'Ma kich hoat OTP cua ban la ' . $otp . '. Ma OTP nay se het hieu luc sau 5 phut.', 'type' => $res['type']];
