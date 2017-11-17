@@ -51,6 +51,10 @@ abstract class AbstractGateway
 		$payload = $jwtConfig + $userInfo;
 		$token = \Firebase\JWT\JWT::encode($payload, $secret, env("JWT_HASH", "HS256"));
 		$uid = $user->getId();
+		$uMobile = $user->getMobile();
+		if($uMobile['mobile'] = ''){
+		    $uMobile = null;
+        }
 		if($uid instanceof \MongoDB\BSON\ObjectID) {
 		    $uid = $uid->__toString();
         }
