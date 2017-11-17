@@ -189,6 +189,16 @@ class Passport extends AbstractService
         return $result;
     }
 
+    public function activateMobile($params)
+    {
+        $errCode = $this->validateParams($params, ['otp']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        $result = $this->mapper->activateMobile($params);
+        return $result;
+    }
+
     public function updateIdentityNumber($params)
     {
         $result = $this->mapper->updateIdentityNumber($params);
@@ -219,12 +229,17 @@ class Passport extends AbstractService
 
         $user = $this->mapper->findByUsername($params['username']);
         if($user) {
-            $redis = $this->serviceManager->get('PredisCache');
-            $rkey = 'otp:'.$user->getId();
-            $code = strtoupper(substr(md5(microtime()), 0, 5));
-            $redis->setex($rkey, 300, $code);
+            $mobileInfo = $user->getMobile();
+            if(isset($mobileInfo) && $mobileInfo['status'] == 1){
 
-            return ['code' => 1, 'result' => ['otp' => $code]];
+                $redis = $this->serviceManager->get('PredisCache');
+                $rkey = 'otp:'.$user->getId();
+                $code = strtoupper(substr(md5(microtime()), 0, 5));
+                $redis->setex($rkey, 300, $code);
+
+                return ['code' => 1, 'result' => ['otp' => $code]];
+            }
+            return ['code' => -3009];
         }
 
         return ['code' => -3002];
@@ -239,15 +254,20 @@ class Passport extends AbstractService
 
         $user = $this->mapper->findByUsername($params['username']);
         if($user) {
-            $redis = $this->serviceManager->get('PredisCache');
-            $rkey = 'otp:'.$user->getId();
-            $otp = $redis->get($rkey);
-            if($otp === $params['otp']) {
+            $mobileInfo = $user->getMobile();
+            if(isset($mobileInfo) && $mobileInfo['status'] == 1) {
 
-                $redis->del($rkey);
-                return ['code' => 1, 'result' => null];
+                $redis = $this->serviceManager->get('PredisCache');
+                $rkey = 'otp:'.$user->getId();
+                $otp = $redis->get($rkey);
+                if($otp === $params['otp']) {
+
+                    $redis->del($rkey);
+                    return ['code' => 1, 'result' => null];
+                }
+                return ['code' => -3007, 'msg' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
             }
-            return ['code' => -3007, 'msg' => 'Ma xac thuc (OTP) da het han. Vui long thu lai!'];
+            return ['code' => 3009];
         }
 
         return ['code' => -3002];

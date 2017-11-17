@@ -29,7 +29,8 @@ Error Code
 |-3005   | Oauth ID exists |
 |-3006   | Invalid Verification Code |
 |-3007   | OTP has expired |
-|
+|-3008   | Mobile exist |
+|-3009   | Mobile not use |
 |-4002   | Card:out-of-stock |
 |-4003   | Card not exit or Used |
 |-4004   | Card used|

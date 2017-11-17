@@ -33,8 +33,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
     	} catch (\Exception $e) {
     		$subject = "System Error: MongoDB Exception";
     		$this->getMailService()->sendAlertEmail($subject, $e);
+    		throw $e;
     	}
-    	return null;
     }
 
     /**
@@ -75,7 +75,6 @@ class Gateway extends AbstractGateway implements UserProviderInterface
     	if(!$this->db) {
     		$this->db = $this->getConnection()->selectDatabase(env('MONGO_DB_AUTH_SOURCE', 'ssg_passport'));
     	}
-
         return $this->db;
     }
 
@@ -269,7 +268,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
     {
         $user = new User();
         try {
-            $userInfo = $this->getCollection()->findOne(['mobile' => $mobile]);
+            $userInfo = $this->getCollection()->findOne(['mobile.mobile' => $mobile]);
             if ($userInfo) {
                 $user->bsonUnserialize($userInfo);
             }else {
@@ -705,10 +704,25 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             return ['code' => -3002];
         }
 
+        $mobileInfo = $currentUser->getMobile();
+
+        if($mobileInfo){
+            $currentMobile = $mobileInfo['mobile'];
+            if($currentMobile != $data['mobile']){
+                $mobile = $this->findByMobile($data['mobile']);
+                if(isset($mobile['mobile']) && $mobile['status'] = 1){
+                    return ['code' => -3008];
+                }
+            }
+        }
+
         $verification_code = strtoupper(substr(md5(microtime()), 0, 5));
         $msec = floor(microtime(true) * 1000);
         $dataToUpdate = [
-            'mobile' => $data['mobile'],
+            'mobile' => [
+                'mobile' => $data['mobile'],
+                'status' => 0
+            ],
             'verification_code' => $verification_code,
             'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
         ];
@@ -724,11 +738,18 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ]
             );
             if ($user) {
+                $redis = $this->getServiceManager()->get('PredisCache');
+
+                $rkey = 'otp:'. $currentUser->getId();
+                $code = strtoupper(substr(md5(microtime()), 0, 5));
+                $redis->setex($rkey, 300, $code);
+
                 if ($currentUser->getEmail()) {
                     // send mail
                     $this->getServiceManager()->get('mailService')->sendEmail($currentUser->getEmail(), $currentUser->getUsername(), $verification_code);
                 }
-                return ['code' => 1, 'msg' => _t("change_mobile_success")];
+
+                return ['code' => 1, 'msg' => _t("change_mobile_success"), 'result' => ['otp' => $code] ];
             } else {
                 return ['code' => -3002, 'msg' => _t("user_not_found")];
             }
@@ -738,6 +759,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
         return ['code' => -9999, 'msg' => _t('change_mobile_fail')];
     }
+
+
 
     public function updateIdentityNumber($data)
     {
@@ -933,53 +956,69 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         return ['code' => -1, 'msg' => _t('activate_email_fail')];
     }
 
-    public function activateMobile($data, $currentUser)
+    public function activateMobile($data)
     {
-        $currentEmail = $currentUser->getEmailAddress();
+        $user = $this->findByMobile($data['mobile']);
+        $data['passportId'] = $user->getId();
+        $currentUser = $this->getById($data['passportId']);
+        if(!$currentUser) {
+            return ['code' => -3009];
+        }
         $currentMobile = $currentUser->getMobile();
 
-        $mobileInfo = [
-            'mobile' => $currentMobile['mobile'],
-            'status' => 1,
-            'verification_code' => null
-        ];
+        if($currentMobile['status'] == 1 ) {
+            return ['code' => -3008];
+        }
 
-        $msec = floor(microtime(true) * 1000);
-        $dataToUpdate = [
+        $redis = $this->getServiceManager()->get('PredisCache');
+
+        $code = $redis->get('otp:' . $currentUser->getId());
+
+        if(isset($code) && $code == $data['otp']){
+            $mobileInfo = [
+                'mobile' => $currentMobile['mobile'],
+                'status' => 1,
+                'verification_code' => null
+            ];
+
+            $msec = floor(microtime(true) * 1000);
+            $dataToUpdate = [
+                'mobile' => $mobileInfo,
                 'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
-        ];
+            ];
 
-        $filterWhere = [
-            '_id' => $currentUser->getId(),
-            'mobile.mobile' => $currentMobile['mobile'],
-        ];
+            $filterWhere = [
+                '_id' => $currentUser->getId(),
+                'mobile.mobile' => $currentMobile['mobile'],
+            ];
 
-        if ($currentMobile['status'] == -1) { // only verify by mobile code
-            $filterWhere['mobile.verification_code'] = $data['otp'];
-            $filterWhere['mobile.status'] = -1;
-        } else { // verify both email & mobile code
-            $filterWhere['mobile.status'] = 0;
-            $filterWhere['email_address.verification_code'] = $data['otp_email'];
-            $filterWhere['mobile.verification_code'] = $data['otp_mobile'];
-            $currentEmail['verification_code'] = null;
-// 			$mobileInfo['status'] = -1;
-// 			$mobileInfo['verification_code'] = strtoupper(substr(md5(microtime()), 0, 5));
-        }
+            try {
+                $user = $this->getCollection()->findOneAndUpdate(
+                    $filterWhere,
+                    [ '$set' => $dataToUpdate ],
+                    [
+                        'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                    ]
+                );
+                if ($user) {
 
-        $dataToUpdate['email_address'] = $currentEmail;
-        $dataToUpdate['mobile'] = $mobileInfo;
+                    $currentUser->setMobile($mobileInfo);
 
-        try {
-            $user = $this->getCollection()->updateOne($filterWhere, ['$set' => $dataToUpdate]);
-            if ($user->getMatchedCount() > 0 && $user->getModifiedCount() > 0) {
-                $currentUser->setMobile($mobileInfo);
-                $currentUser->setEmailAddress($currentEmail);
-                return ['code' => 1, 'msg' => _t("activate_mobile_success")];
+                    return ['code' => 1, 'msg' => _t("activate_mobile_success")];
+                }
+            } catch (\Exception $e) {
+                $subject = "System Error: MongoDB Exception";
+                $this->getMailService()->sendAlertEmail($subject, $e);
             }
-        } catch (\Exception $e) {
-            $subject = "System Error: MongoDB Exception";
-            $this->getMailService()->sendAlertEmail($subject, $e);
         }
+
+        if(!isset($code)) {
+            $rkey = 'otp:'. $currentUser->getId();
+            $code = strtoupper(substr(md5(microtime()), 0, 5));
+            $redis->setex($rkey, 300, $code);
+
+        }
+
         return ['code' => -1, 'msg' => _t('activate_mobile_fail')];
     }
 
@@ -1020,6 +1059,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $subject = "System Error: MongoDB Exception";
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
+
         return ['code' => -1, 'msg' => _t('activate_identity_number_fail')];
     }
 
