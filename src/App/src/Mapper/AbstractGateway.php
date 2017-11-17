@@ -45,7 +45,8 @@ abstract class AbstractGateway
 		$userInfo = [
 				'uid' => $user->getId(),
 				'identity' => $user->getUsername(),
-				'credential' => $user->getPassword()
+				'credential' => $user->getPassword(),
+                'mobile' => $user->getMobile()
 		];
 		$jwtConfig = getConfigToken();
 		$payload = $jwtConfig + $userInfo;
