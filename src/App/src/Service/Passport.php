@@ -143,6 +143,19 @@ class Passport extends AbstractService
         }
         return $result;
     }
+    public function resetPassSlot($params)
+    {
+        $errCode = $this->validateParams($params, ['username', 'password']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
+        $result = $this->mapper->resetPasswordSlot($params);
+        if(strtolower($params['client_id']) == 'b1') {
+            if($result['code'] == -3002) $result['code'] = -2013;
+            if($result['code'] == -3006) $result['code'] = -2012;
+        }
+        return $result;
+    }
 
     public function changePass($params)
     {

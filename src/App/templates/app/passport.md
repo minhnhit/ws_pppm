@@ -493,3 +493,42 @@ __Output Data (JSON Data)__
   "code" : "ErrorCode", 
 }
 ```
+
+___________________________________________________________
+
+
+## XIV. Reset Pass Slot
+
+> URL: [https://{domain}/api/reset-pass-slot](https://{domain}/api/update-identity-number)
+
+> Headers: Authorization: Bearer {token_string_here}
+
+> Method: __HTTP POST__
+
+> Warning : app need verify OTP first before call this function
+
+###### Parameters
+| Param         | Data Type  | Required | Value |
+| ------------- | ---------- | -------- | ----- |
+| username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
+| password      | String     | true     |**/[\s\S]{6,32}/**  | 
+
+
+
+###### Example encrypt parameters
+``` 
+ params = {
+    "username": "test123",
+    "password" : "123456"  (New Password here)
+ };
+ 
+ // @see: Input Data
+ data = AES_Encrypt(aes_secret_key, params);
+```
+__Output Data (JSON Data)__
+---------------------------
+```
+{
+  "code" : "ErrorCode", 
+}
+```

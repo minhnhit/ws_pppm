@@ -1179,8 +1179,12 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         return ['code' => -3002];
     }
 
-    public function forgotPasswordByOtp($data)
+    public function resetPasswordSlot($data)
     {
+        $u = $this->findByUsername($data['username']);
+        if(!$u) {
+            return ['code' => -3002];
+        }
         $msec = floor(microtime(true) * 1000);
         try {
             $user = $this->getCollection()->updateOne(
@@ -1188,6 +1192,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
                 ['$set' =>
                     [
                         'password' => md5($data['password']),
+                        'verification_code' => null,
                         'update_date' => new \MongoDB\BSON\UTCDateTime($msec)
                     ]
                 ]
@@ -1201,7 +1206,10 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             $subject = "System Error: MongoDB Exception";
             $this->getMailService()->sendAlertEmail($subject, $e);
         }
+
+        return ['code' => -3002];
     }
+
 
     public function getEmail($params)
     {
