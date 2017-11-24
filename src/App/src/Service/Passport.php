@@ -143,9 +143,10 @@ class Passport extends AbstractService
         }
         return $result;
     }
+
     public function resetPassSlot($params)
     {
-        $errCode = $this->validateParams($params, ['username', 'password']);
+        $errCode = $this->validateParams($params, ['username', 'password', 'otp']);
         if ($errCode !== 1) {
             return ['code' => $errCode];
         }
@@ -198,13 +199,17 @@ class Passport extends AbstractService
 
     public function updateMobile($params)
     {
+        $errCode = $this->validateParams($params, ['username']);
+        if ($errCode !== 1) {
+            return ['code' => $errCode];
+        }
         $result = $this->mapper->updateMobile($params);
         return $result;
     }
 
     public function activateMobile($params)
     {
-        $errCode = $this->validateParams($params, ['otp']);
+        $errCode = $this->validateParams($params, ['username', 'otp']);
         if ($errCode !== 1) {
             return ['code' => $errCode];
         }
@@ -246,7 +251,7 @@ class Passport extends AbstractService
             if(isset($mobileInfo) && $mobileInfo['status'] == 1){
 
                 $redis = $this->serviceManager->get('PredisCache');
-                $rkey = 'otp:'.$user->getId();
+                $rkey = 'otp: '.$user->getId();
                 $code = strtoupper(substr(md5(microtime()), 0, 5));
                 $redis->setex($rkey, 300, $code);
 
@@ -271,7 +276,7 @@ class Passport extends AbstractService
             if(isset($mobileInfo) && $mobileInfo['status'] == 1) {
 
                 $redis = $this->serviceManager->get('PredisCache');
-                $rkey = 'otp:'.$user->getId();
+                $rkey = 'otp: '.$user->getId();
                 $otp = $redis->get($rkey);
                 if($otp === $params['otp']) {
 
@@ -301,12 +306,12 @@ class Passport extends AbstractService
         }
 
         $redis = $this->serviceManager->get('PredisCache');
-        $rkey = 'otp:'.$userInfo->getId();
+        $rkey = 'otp: '.$userInfo->getId();
         $otp = $redis->get($rkey);
 
         if(!$otp) {
 
-            $rkey = 'otp:'.$userInfo->getId();
+            $rkey = 'otp: '.$userInfo->getId();
             $code = strtoupper(substr(md5(microtime()), 0, 5));
             $redis->setex($rkey, 300, $code);
 

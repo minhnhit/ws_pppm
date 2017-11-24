@@ -30,7 +30,9 @@ Error Code
 |-3006   | Invalid Verification Code |
 |-3007   | OTP has expired |
 |-3008   | Mobile exist |
-|-3009   | Mobile not use |
+|-3009   | User has active mobile |
+|-3010   | User not registed mobile |
+|-3011   | User not actived this mobile |
 |-4002   | Card:out-of-stock |
 |-4003   | Card not exit or Used |
 |-4004   | Card used|
