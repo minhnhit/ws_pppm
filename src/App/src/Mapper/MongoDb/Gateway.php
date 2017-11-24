@@ -281,6 +281,23 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         return $user;
     }
 
+    public function findMobile($mobile)
+    {
+        $user = new User();
+        try {
+            $userInfo = $this->getCollection()->findOne(['mobile.mobile' => $mobile]);
+            if ($userInfo) {
+                $user->bsonUnserialize($userInfo);
+            }else {
+                return null;
+            }
+        } catch (\Exception $e) {
+            $subject = "System Error: MongoDB Exception";
+            $this->getMailService()->sendAlertEmail($subject, $e);
+        }
+        return $user;
+    }
+
     /**
      * @param string $email
      * @return User

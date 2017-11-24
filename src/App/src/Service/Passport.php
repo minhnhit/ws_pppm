@@ -299,7 +299,7 @@ class Passport extends AbstractService
         }
         $mobile = $res['data']['phone'];
 
-        $userInfo = $this->mapper->findByMobile($mobile);
+        $userInfo = $this->mapper->findMobile($mobile);
 
         if(!$userInfo) {
             return ['status' => 0, 'sms' => 'Ban chua dang ky so dien thoai nay. Vui long thu lai!', 'type' => $res['type']];
