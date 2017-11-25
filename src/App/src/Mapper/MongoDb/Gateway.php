@@ -994,7 +994,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
 
         $redis = $this->getServiceManager()->get('PredisCache');
         $code = $redis->get('otp: ' . $currentUser->getId());
-        print_r($code);die;
+
         if(isset($code) && $code == $data['otp'] && $mobileInfo['mobile'] == $data['mobile']){
             $mobileInfo = [
                 'mobile' => $data['mobile'],
