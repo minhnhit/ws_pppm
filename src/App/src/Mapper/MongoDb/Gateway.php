@@ -1211,8 +1211,8 @@ class Gateway extends AbstractGateway implements UserProviderInterface
         }
 
         $mobileInfo = $currentUser->getMobile();
-        if($mobileInfo['mobile'] != $data['mobile']  || $mobileInfo['status'] != 1){
-            return ['code' => -3011];
+        if(!$mobileInfo['mobile'] || $mobileInfo['status'] != 1){
+            return ['code' => -3009];
         }
 
         $redis = $this->getServiceManager()->get('PredisCache');
@@ -1244,7 +1244,7 @@ class Gateway extends AbstractGateway implements UserProviderInterface
             }
         }
 
-        return ['code' => -3002];
+        return ['code' => -3007];
     }
 
 

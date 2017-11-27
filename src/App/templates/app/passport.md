@@ -513,7 +513,6 @@ ___________________________________________________________
 | Param         | Data Type  | Required | Value |
 | ------------- | ---------- | -------- | ----- |
 | username      | String     | true     |**/^[a-z0-9]{6,24}$/**  |
-| mobile        | String     | true     |**/^[d]{0-13}$/**  |
 | otp           | String     | true     |**/^[A-Z0-9]{5}$/**  |
 | password      | String     | true     |**/[\s\S]{6,32}/**  | 
 
@@ -523,7 +522,6 @@ ___________________________________________________________
 ``` 
  params = {
     "username": "test123",
-    "mobile" : "0987654321",
     "otp" : "12WA4",
     "password" : "123456"  (New Password here)
  };
